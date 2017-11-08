@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">DevChat</string>
+    <string name="emailHint">Email</string>
+    <string name="passwordHint">Password</string>
+    <string name="btnLogin">Login</string>
+    <string name="btnRegister">Register</string>
+    <string name="btnCancel">Cancel</string>
+    <string name="usernameHint">Username</string>
 </resources>

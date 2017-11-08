@@ -4,5 +4,5 @@
     <color name="colorPrimaryDark">#192B38</color>
     <color name="colorAccent">#99A658</color>
     <color name="gradientStartColor">#4E7367</color>
-    <color name="grdientEndColor">#2E5458</color>
+    <color name="gradientEndColor">#2E5458</color>
 </resources>
