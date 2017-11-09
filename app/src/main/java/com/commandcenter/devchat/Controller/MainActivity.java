@@ -76,9 +76,6 @@ public class MainActivity extends AppCompatActivity {
                                 //sign in successful
                                 currentUser = mAuth.getCurrentUser();
                                 Intent chatBoxIntent = new Intent(MainActivity.this, Chatbox_Activity.class);
-                                Bundle details = new Bundle();
-                                details.putString("user", currentUser.getDisplayName());
-                                chatBoxIntent.putExtras(details);
                                 startActivity(chatBoxIntent);
                             }else {
                                 //sign in failure
