@@ -16,7 +16,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Controller.ActivityRegister"></activity>
+        <activity android:name=".Controller.ActivityRegister" />
+        <activity android:name=".Chatbox_Activity"></activity>
     </application>
 
 </manifest>

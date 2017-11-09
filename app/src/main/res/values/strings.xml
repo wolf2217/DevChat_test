@@ -6,4 +6,5 @@
     <string name="btnRegister">Register</string>
     <string name="btnCancel">Cancel</string>
     <string name="usernameHint">Username</string>
+    <string name="btnSend">Send</string>
 </resources>
