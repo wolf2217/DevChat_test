@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.commandcenter.devchat.Chatbox_Activity"
+    tools:context="com.commandcenter.devchat.Controller.Chatbox_Activity"
     android:background="@drawable/layout_background">
 
     <LinearLayout
@@ -14,9 +14,11 @@
         android:padding="10dp">
 
         <android.support.v7.widget.RecyclerView
+            android:id="@+id/chatbox_recView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            >
 
         </android.support.v7.widget.RecyclerView>
 
@@ -28,10 +30,12 @@
             android:padding="10dp">
 
             <EditText
+                android:id="@+id/chatbox_et_message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textSize="14sp"/>
+                android:textSize="14sp"
+              />
 
             <Button
                 android:id="@+id/chatbox_btnSend"

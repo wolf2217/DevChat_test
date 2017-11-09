@@ -17,7 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".Controller.ActivityRegister" />
-        <activity android:name=".Chatbox_Activity"></activity>
+        <activity android:name=".Controller.Chatbox_Activity"></activity>
     </application>
 
 </manifest>

@@ -35,6 +35,7 @@
             android:padding="12dp">
 
             <Button
+                android:id="@+id/login_btnLogin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/btnLogin"
@@ -42,6 +43,7 @@
                 />
 
             <Button
+                android:id="@+id/login_btnRegister"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/btnRegister"
