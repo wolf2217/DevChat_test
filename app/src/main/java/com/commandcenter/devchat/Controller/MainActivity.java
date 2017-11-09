@@ -46,7 +46,18 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (currentUser == null) {
                     loginUser(et_email.getText().toString(), et_password.getText().toString());
+                }else {
+                    Intent chatBoxIntent = new Intent(MainActivity.this, Chatbox_Activity.class);
+                    startActivity(chatBoxIntent);
                 }
+            }
+        });
+
+        btn_register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent registerIntent = new Intent(MainActivity.this, ActivityRegister.class);
+                startActivity(registerIntent);
             }
         });
 
