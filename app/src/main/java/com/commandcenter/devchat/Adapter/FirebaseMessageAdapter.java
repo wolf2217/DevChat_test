@@ -30,7 +30,7 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
     public void onBindViewHolder(MessageViewHolder holder, int position) {
 
         ChatboxMessage message = messageList.get(position);
-        holder.tv_message.setText(message.getUser() + ": " + message.getChatMessage());
+        holder.tv_message.setText(message.getChatMessage());
         holder.iv_avatar.setImageResource(R.drawable.ic_person);
     }
 

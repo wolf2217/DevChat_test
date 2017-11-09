@@ -1,6 +1,7 @@
 package com.commandcenter.devchat.Model;
 
 import java.sql.Time;
+import java.util.Date;
 
 /**
  * Created by Command Center on 11/8/2017.
@@ -10,15 +11,18 @@ public class ChatboxMessage {
 
     private String User;
     private String ChatMessage;
-    private Time Timestamp;
+    private String Date;
+    private String time;
 
-    public ChatboxMessage(String user, String chatMessage, Time timestamp) {
-        User = user;
-        ChatMessage = chatMessage;
-        Timestamp = timestamp;
-    }
 
     public ChatboxMessage() {
+    }
+
+    public ChatboxMessage(String user, String chatMessage, String date, String time) {
+        User = user;
+        ChatMessage = chatMessage;
+        Date = date;
+        this.time = time;
     }
 
     public String getUser() {
@@ -37,20 +41,19 @@ public class ChatboxMessage {
         ChatMessage = chatMessage;
     }
 
-    public Time getTimestamp() {
-        return Timestamp;
+    public String getDate() {
+        return Date;
     }
 
-    public void setTimestamp(Time timestamp) {
-        Timestamp = timestamp;
+    public void setDate(String date) {
+        Date = date;
     }
 
-    @Override
-    public String toString() {
-        return "ChatboxMessage{" +
-                "User='" + User + '\'' +
-                ", ChatMessage='" + ChatMessage + '\'' +
-                ", Timestamp=" + Timestamp +
-                '}';
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 }
