@@ -69,11 +69,8 @@ public class Chatbox_Activity extends AppCompatActivity {
                 if (TextUtils.isEmpty(et_message.getText().toString())) {
 
                 }else {
-                    GregorianCalendar gCal = new GregorianCalendar();
-                    int hour = gCal.get(Calendar.HOUR);
-                    int minute = gCal.get(Calendar.MINUTE);
-                    int seconds = gCal.get(Calendar.SECOND);
-                    String time = (String.valueOf(hour) + ":" + String.valueOf(minute) + ":" + String.valueOf(seconds));
+                    SimpleDateFormat dFormat = new SimpleDateFormat("hh/mm/ss a");
+                    String time = dFormat.format(new Date()).toString();
                     ChatboxMessage message = new ChatboxMessage(user, et_message.getText().toString(), curDate, time);
                     mDataRef.child(curDate).push().setValue(message);
                 }
