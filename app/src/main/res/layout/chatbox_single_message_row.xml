@@ -17,12 +17,19 @@
         android:gravity="center">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="75dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
+            android:gravity="left"
             android:padding="2dp">
 
+
+            <ImageView
+                android:id="@+id/chatbox_single_row_iv_avatar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_person"
+                />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -44,10 +51,10 @@
             android:id="@+id/chatbox_single_message_tv_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="top|center_vertical|start"
+            android:gravity="left|center"
+            android:padding="4dp"
             android:text="Chatbox Message"
-            android:textSize="14sp"
-            android:padding="4dp"/>
+            android:textSize="14sp" />
 
     </LinearLayout>
 

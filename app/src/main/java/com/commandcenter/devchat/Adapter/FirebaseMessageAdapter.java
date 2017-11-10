@@ -36,6 +36,7 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
         holder.tv_message.setText(message.getChatMessage());
         holder.tv_username.setText(message.getUser());
         holder.tv_rank.setText(message.getRank());
+        holder.getImageView().setImageResource(R.drawable.ic_person);
     }
 
     @Override
@@ -46,6 +47,7 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
         public TextView tv_message, tv_username, tv_rank;
+        public ImageView iv_avatar;
 
         public MessageViewHolder(View itemView) {
             super(itemView);
@@ -53,6 +55,11 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
             tv_message  = itemView.findViewById(R.id.chatbox_single_message_tv_message);
             tv_username = itemView.findViewById(R.id.chatbox_single_row_tv_username);
             tv_rank     = itemView.findViewById(R.id.chatbox_single_row_tv_rank);
+            iv_avatar   = itemView.findViewById(R.id.chatbox_single_row_iv_avatar);
+        }
+
+        public ImageView getImageView() {
+            return iv_avatar;
         }
     }
 }
