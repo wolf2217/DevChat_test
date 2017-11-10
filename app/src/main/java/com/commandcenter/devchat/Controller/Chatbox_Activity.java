@@ -62,7 +62,7 @@ public class Chatbox_Activity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
         mDataRef = mDatabase.getReference("messages");
-        mUsers = mDatabase.getReference("users").child(mAuth.getCurrentUser().getUid());
+        mUsers = mDatabase.getReference("users");
 
         messageRecView = findViewById(R.id.chatbox_recView);
         et_message = findViewById(R.id.chatbox_et_message);
@@ -83,7 +83,6 @@ public class Chatbox_Activity extends AppCompatActivity {
                     time = dFormat.format(new Date()).toString();
                     ChatboxMessage message = new ChatboxMessage(user, et_message.getText().toString(), rank,  curDate, time);
                     processMessage(user, et_message.getText().toString());
-                    mDataRef.child(curDate).push().setValue(message);
                     et_message.setText("");
                 }
             }
@@ -120,8 +119,8 @@ public class Chatbox_Activity extends AppCompatActivity {
         mUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                user = dataSnapshot.child("username").getValue().toString();
-                rank = dataSnapshot.child("rank").getValue().toString();
+                user = dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("username").getValue().toString();
+                rank = dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("rank").getValue().toString();
             }
 
             @Override
@@ -136,24 +135,58 @@ public class Chatbox_Activity extends AppCompatActivity {
     private void processMessage(String user, String message) {
 
         if (message.startsWith("~")) {
-            String[] messageValues = message.split(" ");
+            final String[] messageValues = message.split(" ");
             String command = messageValues[0].replace("~", "");
+            final String promote_username = messageValues[1];
 
-            switch (command) {
-                case "ban":
+            //user is admin
+            if (rank.equalsIgnoreCase("Admin")) {
 
-                    break;
-                case "silence":
+                switch (command) {
+                    case "ban":
 
-                    break;
-                case "block":
+                        break;
+                    case "silence":
 
-                    break;
+                        break;
+                    case "block":
+
+                        break;
+                    case "warn":
+
+                        break;
+                    case "promote":
+                        mUsers.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+                                for (DataSnapshot child : children) {
+                                    String user = dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("username").getValue().toString();
+                                    String  rank = dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("rank").getValue().toString();
+
+                                    if (user.equalsIgnoreCase(promote_username)) {
+                                        mUsers.child(mAuth.getCurrentUser().getUid()).child("rank").setValue(messageValues[2]);
+                                        ChatboxMessage message = new ChatboxMessage("DevBot", user + " has been promoted to [" + messageValues[2] + "]", messageValues[2], curDate, time);
+                                        mDataRef.child(curDate).push().setValue(message);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                        break;
+                }
             }
+            //user is a regular chat user [no admin privilages]
         }else {
             if (!userList.contains(user)) {
                 welcomeUser(user);
                 userList.add(user);
+            }else {
+                mDataRef.child(curDate).push().setValue(message);
             }
         }
     }
