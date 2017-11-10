@@ -40,6 +40,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     //list of messages
     private List<ChatboxMessage> messageList;
+    private List<String> userList;
     private FirebaseMessageAdapter messageAdapter;
     //Firebase
     private FirebaseDatabase mDatabase;
@@ -66,6 +67,7 @@ public class Chatbox_Activity extends AppCompatActivity {
         messageRecView = findViewById(R.id.chatbox_recView);
         et_message = findViewById(R.id.chatbox_et_message);
         messageList = new ArrayList<>();
+        userList = new ArrayList<>();
 
         Date date = new Date();
         curDate = DateFormat.getDateInstance().format(date);
@@ -80,6 +82,7 @@ public class Chatbox_Activity extends AppCompatActivity {
                     SimpleDateFormat dFormat = new SimpleDateFormat("hh/mm/ss a");
                     time = dFormat.format(new Date()).toString();
                     ChatboxMessage message = new ChatboxMessage(user, et_message.getText().toString(), rank,  curDate, time);
+                    processMessage(user, et_message.getText().toString());
                     mDataRef.child(curDate).push().setValue(message);
                     et_message.setText("");
                 }
@@ -95,6 +98,7 @@ public class Chatbox_Activity extends AppCompatActivity {
                     ChatboxMessage message = child.getValue(ChatboxMessage.class);
                     if (!messageList.contains(message)) {
                         messageList.add(message);
+                       // processMessage(message.getUser(), message.getChatMessage());
                     }
                 }
                 messageAdapter = new FirebaseMessageAdapter(getApplicationContext(), messageList);
@@ -118,7 +122,6 @@ public class Chatbox_Activity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 user = dataSnapshot.child("username").getValue().toString();
                 rank = dataSnapshot.child("rank").getValue().toString();
-                welcomeUser(user);
             }
 
             @Override
@@ -130,12 +133,37 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     }
 
+    private void processMessage(String user, String message) {
+
+        if (message.startsWith("~")) {
+            String[] messageValues = message.split(" ");
+            String command = messageValues[0].replace("~", "");
+
+            switch (command) {
+                case "ban":
+
+                    break;
+                case "silence":
+
+                    break;
+                case "block":
+
+                    break;
+            }
+        }else {
+            if (!userList.contains(user)) {
+                welcomeUser(user);
+                userList.add(user);
+            }
+        }
+    }
+
     private void welcomeUser(String username) {
 
         SimpleDateFormat dFormat = new SimpleDateFormat("hh/mm/ss a");
         String curTime = dFormat.format(new Date()).toString();
 
-        ChatboxMessage message = new ChatboxMessage("DevChat Bot", "Welcome to DevChat : " + user, "Moderator Bot", curDate, curTime);
+        ChatboxMessage message = new ChatboxMessage("DevChat Bot", "Welcome to DevChat : " + username, "Moderator Bot", curDate, curTime);
         mDataRef.child(curDate).push().setValue(message);
     }
 }

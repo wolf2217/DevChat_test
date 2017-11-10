@@ -35,7 +35,7 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
         ChatboxMessage message = messageList.get(position);
         holder.tv_message.setText(message.getChatMessage());
         holder.tv_username.setText(message.getUser());
-        holder.tv_rank.setText("Admin");
+        holder.tv_rank.setText(message.getRank());
     }
 
     @Override
