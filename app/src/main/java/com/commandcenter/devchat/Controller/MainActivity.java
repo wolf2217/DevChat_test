@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseUser currentUser;
 
+    String[] values;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +42,15 @@ public class MainActivity extends AppCompatActivity {
 
         btn_login    = findViewById(R.id.login_btnLogin);
         btn_register = findViewById(R.id.login_btnRegister);
+
+        Intent intent = getIntent();
+        Bundle details = intent.getExtras();
+
+        if (details != null) {
+            values = intent.getStringArrayExtra("details");
+            et_email.setText(values[0]);
+            et_password.setText(values[1]);
+        }
 
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -100,5 +111,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         currentUser = mAuth.getCurrentUser();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mAuth.signOut();
     }
 }

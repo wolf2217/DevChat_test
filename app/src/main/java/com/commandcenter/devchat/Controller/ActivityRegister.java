@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.commandcenter.devchat.Model.User;
 import com.commandcenter.devchat.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -27,6 +28,8 @@ public class ActivityRegister extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseDatabase mDatabase;
     private DatabaseReference mRef;
+
+    String[] values;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +50,7 @@ public class ActivityRegister extends AppCompatActivity {
         Bundle details = intent.getExtras();
 
         if (details != null) {
-            String[] values = intent.getStringArrayExtra("details");
+            values = intent.getStringArrayExtra("details");
             et_email.setText(values[0]);
             et_password.setText(values[1]);
         }
@@ -72,6 +75,11 @@ public class ActivityRegister extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 Toast.makeText(ActivityRegister.this, "User Account Created!", Toast.LENGTH_SHORT).show();
                                 createUser(et_username.getText().toString());
+                                Intent signInIntent = new Intent(ActivityRegister.this, MainActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putStringArray("values", values);
+                                signInIntent.putExtras(bundle);
+                                startActivity(signInIntent);
                             } else {
                                 Toast.makeText(ActivityRegister.this, "Error Creating New User Account!", Toast.LENGTH_SHORT).show();
                             }
@@ -86,7 +94,8 @@ public class ActivityRegister extends AppCompatActivity {
             Toast.makeText(this, "Username Field Required!", Toast.LENGTH_SHORT).show();
             return;
         }else {
-            mRef.child(mAuth.getCurrentUser().getUid()).setValue(username);
+            User user = new User(et_username.getText().toString(), "Newbie");
+            mRef.child(mAuth.getCurrentUser().getUid()).setValue(user);
         }
     }
 }

@@ -11,18 +11,20 @@ public class ChatboxMessage {
 
     private String User;
     private String ChatMessage;
+    private String Rank;
     private String Date;
-    private String time;
+    private String Time;
 
 
     public ChatboxMessage() {
     }
 
-    public ChatboxMessage(String user, String chatMessage, String date, String time) {
+    public ChatboxMessage(String user, String chatMessage, String rank, String date, String time) {
         User = user;
         ChatMessage = chatMessage;
+        Rank = rank;
         Date = date;
-        this.time = time;
+        Time = time;
     }
 
     public String getUser() {
@@ -41,6 +43,14 @@ public class ChatboxMessage {
         ChatMessage = chatMessage;
     }
 
+    public String getRank() {
+        return Rank;
+    }
+
+    public void setRank(String rank) {
+        Rank = rank;
+    }
+
     public String getDate() {
         return Date;
     }
@@ -50,10 +60,10 @@ public class ChatboxMessage {
     }
 
     public String getTime() {
-        return time;
+        return Time;
     }
 
     public void setTime(String time) {
-        this.time = time;
+        Time = time;
     }
 }

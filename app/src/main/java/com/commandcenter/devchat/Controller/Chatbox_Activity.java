@@ -3,12 +3,15 @@ package com.commandcenter.devchat.Controller;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.commandcenter.devchat.Adapter.FirebaseMessageAdapter;
 import com.commandcenter.devchat.Model.ChatboxMessage;
 import com.commandcenter.devchat.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,7 +40,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     //list of messages
     private List<ChatboxMessage> messageList;
-
+    private FirebaseMessageAdapter messageAdapter;
     //Firebase
     private FirebaseDatabase mDatabase;
     private DatabaseReference mDataRef;
@@ -45,7 +48,10 @@ public class Chatbox_Activity extends AppCompatActivity {
     private FirebaseAuth mAuth;
 
     private String user;
+    private String rank;
 
+    private String curDate;
+    private String time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +63,13 @@ public class Chatbox_Activity extends AppCompatActivity {
         mDataRef = mDatabase.getReference("messages");
         mUsers = mDatabase.getReference("users").child(mAuth.getCurrentUser().getUid());
 
-        messageList = new ArrayList<>();
-        Date date = new Date();
-        final String curDate = DateFormat.getDateInstance().format(date);
-
+        messageRecView = findViewById(R.id.chatbox_recView);
         et_message = findViewById(R.id.chatbox_et_message);
+        messageList = new ArrayList<>();
+
+        Date date = new Date();
+        curDate = DateFormat.getDateInstance().format(date);
+
         btnSend =  findViewById(R.id.chatbox_btnSend);
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,25 +78,33 @@ public class Chatbox_Activity extends AppCompatActivity {
 
                 }else {
                     SimpleDateFormat dFormat = new SimpleDateFormat("hh/mm/ss a");
-                    String time = dFormat.format(new Date()).toString();
-                    ChatboxMessage message = new ChatboxMessage(user, et_message.getText().toString(), curDate, time);
+                    time = dFormat.format(new Date()).toString();
+                    ChatboxMessage message = new ChatboxMessage(user, et_message.getText().toString(), rank,  curDate, time);
                     mDataRef.child(curDate).push().setValue(message);
+                    et_message.setText("");
                 }
             }
         });
 
-        mDataRef.addValueEventListener(new ValueEventListener() {
+        mDataRef.child(curDate).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                messageList.clear();
                 Iterable<DataSnapshot> children = dataSnapshot.getChildren();
                 for (DataSnapshot child : children) {
-                    String child_values = child.getValue().toString();
-                    String[] values = child_values.split(",");
-                  //  ChatboxMessage message = new ChatboxMessage(values[2]);
-                   // messageList.add(message);
-
+                    ChatboxMessage message = child.getValue(ChatboxMessage.class);
+                    if (!messageList.contains(message)) {
+                        messageList.add(message);
+                    }
                 }
-                String test1 = "";
+                messageAdapter = new FirebaseMessageAdapter(getApplicationContext(), messageList);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(Chatbox_Activity.this);
+                messageRecView.setLayoutManager(mLayoutManager);
+                messageRecView.setItemAnimator(new DefaultItemAnimator());
+                messageRecView.setAdapter(messageAdapter);
+                mLayoutManager.scrollToPosition(messageList.size() - 1);
+              //  messageRecView.scrollToPosition(messageList.size());
+               // String test1 = "";
             }
 
             @Override
@@ -100,7 +116,9 @@ public class Chatbox_Activity extends AppCompatActivity {
         mUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                user = dataSnapshot.getValue().toString();
+                user = dataSnapshot.child("username").getValue().toString();
+                rank = dataSnapshot.child("rank").getValue().toString();
+                welcomeUser(user);
             }
 
             @Override
@@ -109,9 +127,15 @@ public class Chatbox_Activity extends AppCompatActivity {
             }
         });
 
+
     }
 
     private void welcomeUser(String username) {
-        et_message.setText(username);
+
+        SimpleDateFormat dFormat = new SimpleDateFormat("hh/mm/ss a");
+        String curTime = dFormat.format(new Date()).toString();
+
+        ChatboxMessage message = new ChatboxMessage("DevChat Bot", "Welcome to DevChat : " + user, "Moderator Bot", curDate, curTime);
+        mDataRef.child(curDate).push().setValue(message);
     }
 }

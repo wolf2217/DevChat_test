@@ -1,5 +1,6 @@
 package com.commandcenter.devchat.Adapter;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,8 +16,10 @@ import java.util.List;
 public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessageAdapter.MessageViewHolder>{
 
     List<ChatboxMessage> messageList;
+    Context context;
 
-    public FirebaseMessageAdapter(List<ChatboxMessage> messageList) {
+    public FirebaseMessageAdapter(Context context, List<ChatboxMessage> messageList) {
+        this.context = context;
         this.messageList = messageList;
     }
 
@@ -31,7 +34,8 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
 
         ChatboxMessage message = messageList.get(position);
         holder.tv_message.setText(message.getChatMessage());
-        holder.iv_avatar.setImageResource(R.drawable.ic_person);
+        holder.tv_username.setText(message.getUser());
+        holder.tv_rank.setText("Admin");
     }
 
     @Override
@@ -41,14 +45,14 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
 
     public class MessageViewHolder extends RecyclerView.ViewHolder {
 
-        public ImageView iv_avatar;
-        public TextView tv_message;
+        public TextView tv_message, tv_username, tv_rank;
 
         public MessageViewHolder(View itemView) {
             super(itemView);
 
-            iv_avatar = itemView.findViewById(R.id.chatbox_single_message_avatar);
-            tv_message = itemView.findViewById(R.id.chatbox_single_message_tv_message);
+            tv_message  = itemView.findViewById(R.id.chatbox_single_message_tv_message);
+            tv_username = itemView.findViewById(R.id.chatbox_single_row_tv_username);
+            tv_rank     = itemView.findViewById(R.id.chatbox_single_row_tv_rank);
         }
     }
 }
