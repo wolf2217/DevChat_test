@@ -82,23 +82,27 @@ public class Chatbox_Activity extends AppCompatActivity {
                     SimpleDateFormat dFormat = new SimpleDateFormat("hh/mm/ss a");
                     time = dFormat.format(new Date()).toString();
                     ChatboxMessage message = new ChatboxMessage(user, et_message.getText().toString(), rank,  curDate, time);
-                    processMessage(user, et_message.getText().toString());
+                    processMessage(user, message);
                     et_message.setText("");
                 }
             }
         });
 
-        mDataRef.child(curDate).addValueEventListener(new ValueEventListener() {
+        mDataRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 messageList.clear();
                 Iterable<DataSnapshot> children = dataSnapshot.getChildren();
                 for (DataSnapshot child : children) {
-                    ChatboxMessage message = child.getValue(ChatboxMessage.class);
-                    if (!messageList.contains(message)) {
-                        messageList.add(message);
-                       // processMessage(message.getUser(), message.getChatMessage());
+                    Iterable<DataSnapshot> messageNode = child.getChildren();
+                    for(DataSnapshot childNode : messageNode) {
+                        ChatboxMessage message = childNode.getValue(ChatboxMessage.class);
+                        if (!messageList.contains(message)) {
+                            messageList.add(message);
+                            // processMessage(message.getUser(), message.getChatMessage());
+                        }
                     }
+
                 }
                 messageAdapter = new FirebaseMessageAdapter(getApplicationContext(), messageList);
                 RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(Chatbox_Activity.this);
@@ -132,10 +136,11 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     }
 
-    private void processMessage(String user, String message) {
+    private void processMessage(String user, ChatboxMessage message) {
 
-        if (message.startsWith("~")) {
-            final String[] messageValues = message.split(" ");
+        String messageCur = message.getChatMessage();
+        if (messageCur.startsWith("~")) {
+            final String[] messageValues = messageCur.split(" ");
             String command = messageValues[0].replace("~", "");
             final String promote_username = messageValues[1];
 
@@ -161,8 +166,8 @@ public class Chatbox_Activity extends AppCompatActivity {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 Iterable<DataSnapshot> children = dataSnapshot.getChildren();
                                 for (DataSnapshot child : children) {
-                                    String user = dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("username").getValue().toString();
-                                    String  rank = dataSnapshot.child(mAuth.getCurrentUser().getUid()).child("rank").getValue().toString();
+                                    String user = dataSnapshot.child("username").getValue().toString();
+                                    String  rank = dataSnapshot.child("rank").getValue().toString();
 
                                     if (user.equalsIgnoreCase(promote_username)) {
                                         mUsers.child(mAuth.getCurrentUser().getUid()).child("rank").setValue(messageValues[2]);
@@ -185,6 +190,7 @@ public class Chatbox_Activity extends AppCompatActivity {
             if (!userList.contains(user)) {
                 welcomeUser(user);
                 userList.add(user);
+                mDataRef.child(curDate).push().setValue(message);
             }else {
                 mDataRef.child(curDate).push().setValue(message);
             }
