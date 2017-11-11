@@ -94,7 +94,7 @@ public class ActivityRegister extends AppCompatActivity {
             Toast.makeText(this, "Username Field Required!", Toast.LENGTH_SHORT).show();
             return;
         }else {
-            User user = new User(et_username.getText().toString(), "Newbie");
+            User user = new User(et_username.getText().toString(), "Newbie", "Active");
             mRef.child(mAuth.getCurrentUser().getUid()).setValue(user);
         }
     }

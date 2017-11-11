@@ -23,6 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -72,14 +73,13 @@ public class Chatbox_Activity extends AppCompatActivity {
         messageList = new ArrayList<>();
         userList = new ArrayList<>();
 
-        Date date = new Date();
-        curDate = DateFormat.getDateInstance().format(date);
-
+        curDate = setDate();
         //Button click event
         btnSend =  findViewById(R.id.chatbox_btnSend);
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+               curDate = setDate();
                 if (TextUtils.isEmpty(et_message.getText().toString())) {
 
                 }else {
@@ -137,6 +137,17 @@ public class Chatbox_Activity extends AppCompatActivity {
             }
         });
 
+
+    }
+    //set time zone for the date
+    private String setDate() {
+
+        String thisDate = "";
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("America/Florida"));
+        DateFormat formatter = new SimpleDateFormat("M-dd-yyyy");
+        formatter.setTimeZone(TimeZone.getTimeZone("America/Florida"));
+        thisDate = formatter.format(cal.getTime());
+        return thisDate;
 
     }
 
