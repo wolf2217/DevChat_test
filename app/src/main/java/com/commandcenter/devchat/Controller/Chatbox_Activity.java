@@ -45,6 +45,7 @@ public class Chatbox_Activity extends AppCompatActivity {
     //Firebase
     private FirebaseDatabase mDatabase;
     private DatabaseReference mDataRef;
+    private DatabaseReference mNewMessageRef;
     private DatabaseReference mUsers;
     private FirebaseAuth mAuth;
 
@@ -62,6 +63,7 @@ public class Chatbox_Activity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
         mDataRef = mDatabase.getReference("messages");
+        mNewMessageRef = mDatabase.getReference("messages");
         mUsers = mDatabase.getReference("users");
 
         messageRecView = findViewById(R.id.chatbox_recView);
@@ -88,7 +90,33 @@ public class Chatbox_Activity extends AppCompatActivity {
             }
         });
 
-        mDataRef.addValueEventListener(new ValueEventListener() {
+        mNewMessageRef.child(curDate).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                messageList.clear();
+                Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+                for(DataSnapshot child : children) {
+                    ChatboxMessage message = child.getValue(ChatboxMessage.class);
+                    if (!messageList.contains(message)) {
+                        messageList.add(message);
+                        // processMessage(message.getUser(), message.getChatMessage());
+                    }
+                }
+                messageAdapter = new FirebaseMessageAdapter(getApplicationContext(), messageList);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(Chatbox_Activity.this);
+                messageRecView.setLayoutManager(mLayoutManager);
+                messageRecView.setItemAnimator(new DefaultItemAnimator());
+                messageRecView.setAdapter(messageAdapter);
+                mLayoutManager.scrollToPosition(messageList.size() - 1);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        mDataRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 messageList.clear();
