@@ -29,6 +29,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 public class Chatbox_Activity extends AppCompatActivity {
 
@@ -83,6 +84,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
                 }else {
                     SimpleDateFormat dFormat = new SimpleDateFormat("hh/mm/ss a");
+                    dFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                     time = dFormat.format(new Date()).toString();
                     ChatboxMessage message = new ChatboxMessage(user, et_message.getText().toString(), rank,  curDate, time);
                     processMessage(user, message);
@@ -90,8 +92,11 @@ public class Chatbox_Activity extends AppCompatActivity {
                 }
             }
         });
+        //this removes the specific node and all the child nodes from firebase
+        // mNewMessageRef.removeValue();
 
         //Load messages from current date
+
         mNewMessageRef.child(curDate).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
