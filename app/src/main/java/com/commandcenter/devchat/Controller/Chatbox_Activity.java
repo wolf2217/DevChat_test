@@ -144,7 +144,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
         String thisDate = "";
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("America/Florida"));
-        DateFormat formatter = new SimpleDateFormat("M-dd-yyyy");
+        DateFormat formatter = new SimpleDateFormat("MMMM dd, yyyy");
         formatter.setTimeZone(TimeZone.getTimeZone("America/Florida"));
         thisDate = formatter.format(cal.getTime());
         return thisDate;
