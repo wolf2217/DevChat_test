@@ -74,6 +74,7 @@ public class Chatbox_Activity extends AppCompatActivity {
         Date date = new Date();
         curDate = DateFormat.getDateInstance().format(date);
 
+        //Button click event
         btnSend =  findViewById(R.id.chatbox_btnSend);
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,6 +91,7 @@ public class Chatbox_Activity extends AppCompatActivity {
             }
         });
 
+        //Load messages from current date
         mNewMessageRef.child(curDate).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -99,7 +101,7 @@ public class Chatbox_Activity extends AppCompatActivity {
                     ChatboxMessage message = child.getValue(ChatboxMessage.class);
                     if (!messageList.contains(message)) {
                         messageList.add(message);
-                        // processMessage(message.getUser(), message.getChatMessage());
+                       // processMessage(message.getUser(), message);
                     }
                 }
                 messageAdapter = new FirebaseMessageAdapter(getApplicationContext(), messageList);
@@ -116,37 +118,6 @@ public class Chatbox_Activity extends AppCompatActivity {
             }
         });
 
-        mDataRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                messageList.clear();
-                Iterable<DataSnapshot> children = dataSnapshot.getChildren();
-                for (DataSnapshot child : children) {
-                    Iterable<DataSnapshot> messageNode = child.getChildren();
-                    for(DataSnapshot childNode : messageNode) {
-                        ChatboxMessage message = childNode.getValue(ChatboxMessage.class);
-                        if (!messageList.contains(message)) {
-                            messageList.add(message);
-                            // processMessage(message.getUser(), message.getChatMessage());
-                        }
-                    }
-
-                }
-                messageAdapter = new FirebaseMessageAdapter(getApplicationContext(), messageList);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(Chatbox_Activity.this);
-                messageRecView.setLayoutManager(mLayoutManager);
-                messageRecView.setItemAnimator(new DefaultItemAnimator());
-                messageRecView.setAdapter(messageAdapter);
-                mLayoutManager.scrollToPosition(messageList.size() - 1);
-              //  messageRecView.scrollToPosition(messageList.size());
-               // String test1 = "";
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
 
         mUsers.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -222,7 +193,14 @@ public class Chatbox_Activity extends AppCompatActivity {
             }else {
                 mDataRef.child(curDate).push().setValue(message);
             }
+
         }
+       switch (messageCur) {
+           case "DevChat Bot is a jerk":
+               ChatboxMessage newMessage = new ChatboxMessage("DevBot", user + " Please be nice to me!", "Moderator Bot",curDate, time);
+               mDataRef.child(curDate).push().setValue(newMessage);
+               break;
+       }
     }
 
     private void welcomeUser(String username) {
