@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Random;
 import java.util.TimeZone;
 
 public class Chatbox_Activity extends AppCompatActivity {
@@ -65,15 +66,10 @@ public class Chatbox_Activity extends AppCompatActivity {
     private String curDate;
     private String time;
 
-    NotificationCompat.Builder notification;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatbox);
-
-        notification = new NotificationCompat.Builder(this);
-        notification.setAutoCancel(true);
 
         curDate = setDate();
         mDatabase = FirebaseDatabase.getInstance();
@@ -191,19 +187,6 @@ public class Chatbox_Activity extends AppCompatActivity {
     // process message before it leaves
     private void processMessage(ChatboxMessage message) {
 
-        notification.setSmallIcon(R.drawable.ic_person);
-        notification.setTicker("New DevChat Message");
-        notification.setWhen(System.currentTimeMillis());
-        notification.setContentTitle("This is the title");
-        notification.setContentText("You have a new message on DevChat");
-
-        Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        notification.setContentIntent(pendingIntent);
-
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        nm.notify(uniqueID, notification.build());
-
         String curMessage = message.getChatMessage();//gets message
         String curUser = message.getUser();//gets user
         String curRank = message.getRank();//gets rank
@@ -240,14 +223,14 @@ public class Chatbox_Activity extends AppCompatActivity {
             default: //all other user privilages just send the message , when we decide to add more ranks we will put them here to process.
                      //maybe we can add different color text for different ranks.
                 String[] ban_words = new String[] {"shit", "fuck", "dick", "pussy", "asshole", "ass"};
-                for (int i = 0; i < curMessage.length(); i++) {
-                    for (int x = 0; x < ban_words.length; x++) {
-                        if (curMessage.equalsIgnoreCase(ban_words[x])) {
-                            curMessage.replace(ban_words[i], "piggy");
-                        }
-                    }
-
+                for (String word : curMessage.split(" ")) {
+                      for (int i = 0; i < ban_words.length; i++) {
+                          if (word.equalsIgnoreCase(ban_words[i])) {
+                              curMessage = curMessage.replace(word, "piggy");
+                          }
+                      }
                 }
+
                 ChatboxMessage newMessage = new ChatboxMessage(message.getUser(), curMessage,message.getRank(), message.getDate(), message.getTime());
                 mNewMessageRef.push().setValue(newMessage);
                 et_message.setText("");
@@ -284,6 +267,17 @@ public class Chatbox_Activity extends AppCompatActivity {
         super.onStop();
         setStatus("Offline");
         mAuth.signOut();
+    }
+
+    private int generateID() {
+
+        int id = 000000;
+        Random rand = new Random();
+        int min = 000000;
+        int max = 999999;
+        id = rand.nextInt((max - min) + 1) + min;
+
+        return id;
     }
 
     private void setStatus(String status) {
