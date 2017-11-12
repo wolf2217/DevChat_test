@@ -1,8 +1,10 @@
 package com.commandcenter.devchat.Controller;
 
 
+import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -155,6 +158,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
             }
         });
+        setStatus("Online");
 
     }
 
@@ -187,7 +191,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     }
     // process message before it leaves
-    private void processMessage(ChatboxMessage message, String chatstatus) {
+    private void processMessage(final ChatboxMessage message, String chatstatus) {
 
         String[] ban_words = new String[] {"shit", "fuck", "dick", "pussy", "asshole", "ass"};
         String curMessage = message.getChatMessage();//gets message
@@ -251,7 +255,26 @@ public class Chatbox_Activity extends AppCompatActivity {
             case "Silence":
             case "Kick":
                 String toastMessage = message.getUser() + ", you do not have chat privilages.\r\nPlease email glarosa001@tampabay.rr.com to get privilages restored";
-                Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
+               // Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+                alertBuilder.setTitle("Privilages Revoked");
+
+                final EditText input = new EditText(this);
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                alertBuilder.setView(input);
+                alertBuilder.setMessage(toastMessage)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String email = "glarosa001@tampabay.rr.com";
+                                String subject = "DevChat Banned Account";
+                                String emailMessage = "User [" + message.getUser() + "] would Like Their Account Privilages Restored!\r\nReason : " + input.getText().toString();
+                                EmailHelper emailHelper = new EmailHelper(Chatbox_Activity.this, email, subject, emailMessage);
+                                emailHelper.sendEmail(email, subject, emailMessage);
+                            }
+                        });
+                AlertDialog alert = alertBuilder.create();
+                alert.show();
                 et_message.setText("");
                 break;
 
