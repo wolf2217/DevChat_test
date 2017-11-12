@@ -36,6 +36,7 @@ public class ActivityRegister extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        values = new String[3];
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance();
         mRef = mDatabase.getReference("users");
@@ -53,6 +54,10 @@ public class ActivityRegister extends AppCompatActivity {
             values = intent.getStringArrayExtra("details");
             et_email.setText(values[0]);
             et_password.setText(values[1]);
+        }else {
+            values[0] = et_email.getText().toString();
+            values[1] = et_password.getText().toString();
+            values[2] = et_username.getText().toString();
         }
 
         btn_register.setOnClickListener(new View.OnClickListener() {
@@ -94,7 +99,7 @@ public class ActivityRegister extends AppCompatActivity {
             Toast.makeText(this, "Username Field Required!", Toast.LENGTH_SHORT).show();
             return;
         }else {
-            User user = new User(et_username.getText().toString(), "Newbie", "Active");
+            User user = new User(et_username.getText().toString(), "Newbie", "Online", "Active");
             mRef.child(mAuth.getCurrentUser().getUid()).setValue(user);
         }
     }

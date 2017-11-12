@@ -62,6 +62,7 @@ public class Chatbox_Activity extends AppCompatActivity {
     private String userID;
     private String rank;
     private String status;
+    private String chatStatus;
 
     private String curDate;
     private String time;
@@ -100,7 +101,7 @@ public class Chatbox_Activity extends AppCompatActivity {
                         return;
                     }else {
                         ChatboxMessage message = new ChatboxMessage(user, et_message.getText().toString(), rank,  curDate, time);
-                        processMessage(message);
+                        processMessage(message, chatStatus);
 
                     }
 
@@ -145,6 +146,7 @@ public class Chatbox_Activity extends AppCompatActivity {
                 user = dataSnapshot.child("username").getValue().toString();
                 rank = dataSnapshot.child("rank").getValue().toString();
                 status = dataSnapshot.child("status").getValue().toString();
+                chatStatus = dataSnapshot.child("chatStatus").getValue().toString();
                 welcomeUser(user);
             }
 
@@ -185,54 +187,71 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     }
     // process message before it leaves
-    private void processMessage(ChatboxMessage message) {
+    private void processMessage(ChatboxMessage message, String chatstatus) {
 
+        String[] ban_words = new String[] {"shit", "fuck", "dick", "pussy", "asshole", "ass"};
         String curMessage = message.getChatMessage();//gets message
         String curUser = message.getUser();//gets user
         String curRank = message.getRank();//gets rank
 
-        switch (curRank) {
-            case "Admin"://user is Admin and has more privilages
-            case "Owner"://user is Owner and has more privilages
-                if (curMessage.startsWith("~")) {
-                    String[] messageDetails = curMessage.split(" ");//split the current message on the space to get the command(param 0), the username(param 1) i.e ~ban Inked
-                    switch(messageDetails[0]) {
-                        //commands
-                        case "~ban":
-                            //set user status
-                            break;
-                        case "~kick":
+        switch(chatstatus) {
+            case "Active":// user has full access to chat
+                switch (curRank) {
+                       case "Admin"://user is Admin and has more privilages
+                       case "Owner"://user is Owner and has more privilages
+                            if (curMessage.startsWith("~")) {
+                                String[] messageDetails = curMessage.split(" ");//split the current message on the space to get the command(param 0), the username(param 1) i.e ~ban Inked
+                                switch (messageDetails[0]) {
+                                    //commands
+                                    case "~ban":
+                                        //set user status
+                                        mUsers.child("chatStatus").setValue("Ban");
+                                        SimpleDateFormat dFormat = new SimpleDateFormat("hh:mm:ss a");
+                                        dFormat.setTimeZone(TimeZone.getDefault());
+                                        String curtime = dFormat.format(new Date()).toString();
+                                        ChatboxMessage banMessage = new ChatboxMessage(curUser, curUser + " has been banned by Admin", curRank, curDate, curtime);
+                                        mNewMessageRef.push().setValue(banMessage);
+                                        break;
+                                    case "~kick":
 
-                            break;
-                        case "~silence":
+                                        break;
+                                    case "~silence":
 
-                            break;
-                        case "~warn":
+                                        break;
+                                    case "~warn":
 
-                            break;
-                    }
-                }else {
-                    mNewMessageRef.push().setValue(message);
-                    et_message.setText("");
+                                        break;
+                                }
+                            } else {
+                                mNewMessageRef.push().setValue(message);
+                                et_message.setText("");
+                            }
+                        break;
+                        case "Moderator":
+
+                        break;
+
+                        default: //all other user privilages just send the message , when we decide to add more ranks we will put them here to process.
+                             //maybe we can add different color text for different ranks.
+                        for (String word : curMessage.split(" ")) {
+                            for (int i = 0; i < ban_words.length; i++) {
+                                if (word.equalsIgnoreCase(ban_words[i])) {
+                                    curMessage = curMessage.replace(word, "piggy");
+                                }
+                            }
+                        }
+                        ChatboxMessage newMessage = new ChatboxMessage(message.getUser(), curMessage, message.getRank(), message.getDate(), message.getTime());
+                        mNewMessageRef.push().setValue(newMessage);
+                        et_message.setText("");
+                        break;
                 }
                 break;
-            case "Moderator":
-
-                break;
-
-            default: //all other user privilages just send the message , when we decide to add more ranks we will put them here to process.
-                     //maybe we can add different color text for different ranks.
-                String[] ban_words = new String[] {"shit", "fuck", "dick", "pussy", "asshole", "ass"};
-                for (String word : curMessage.split(" ")) {
-                      for (int i = 0; i < ban_words.length; i++) {
-                          if (word.equalsIgnoreCase(ban_words[i])) {
-                              curMessage = curMessage.replace(word, "piggy");
-                          }
-                      }
-                }
-
-                ChatboxMessage newMessage = new ChatboxMessage(message.getUser(), curMessage,message.getRank(), message.getDate(), message.getTime());
-                mNewMessageRef.push().setValue(newMessage);
+            //end Online Status
+            case "Ban"://user is banned from chatting, any one of these 3 case and the user gets a toast message.
+            case "Silence":
+            case "Kick":
+                String toastMessage = message.getUser() + ", you do not have chat privilages.\r\nPlease email glarosa001@tampabay.rr.com to get privilages restored";
+                Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
                 et_message.setText("");
                 break;
 

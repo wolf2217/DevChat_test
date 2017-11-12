@@ -1,6 +1,8 @@
 package com.commandcenter.devchat.Adapter;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +39,12 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
         holder.tv_username.setText(message.getUser());
         holder.tv_rank.setText(message.getRank());
         holder.getImageView().setImageResource(R.drawable.ic_person);
+        if (message.getRank().equalsIgnoreCase("Admin")) {
+            holder.card.setCardBackgroundColor(Color.GRAY);
+            holder.tv_rank.setTextColor(Color.WHITE);
+            holder.tv_username.setTextColor(Color.WHITE);
+            holder.tv_message.setTextColor(Color.WHITE);
+        }
     }
 
     @Override
@@ -48,10 +56,11 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
 
         public TextView tv_message, tv_username, tv_rank;
         public ImageView iv_avatar;
+        public CardView card;
 
         public MessageViewHolder(View itemView) {
             super(itemView);
-
+            card = itemView.findViewById(R.id.chatbox_message_cardview);
             tv_message  = itemView.findViewById(R.id.chatbox_single_message_tv_message);
             tv_username = itemView.findViewById(R.id.chatbox_single_row_tv_username);
             tv_rank     = itemView.findViewById(R.id.chatbox_single_row_tv_rank);

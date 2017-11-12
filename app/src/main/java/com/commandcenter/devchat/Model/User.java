@@ -9,14 +9,16 @@ public class User {
     private String Username;
     private String Rank;
     private String Status;
+    private String chatStatus;
 
     public User() {
     }
 
-    public User(String username, String rank, String status) {
+    public User(String username, String rank, String status, String chatStatus) {
         Username = username;
         Rank = rank;
         Status = status;
+        this.chatStatus = chatStatus;
     }
 
     public String getUsername() {
@@ -41,5 +43,13 @@ public class User {
 
     public void setStatus(String status) {
         Status = status;
+    }
+
+    public String getChatStatus() {
+        return chatStatus;
+    }
+
+    public void setChatStatus(String chatStatus) {
+        this.chatStatus = chatStatus;
     }
 }
