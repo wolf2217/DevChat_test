@@ -17,8 +17,8 @@ import java.util.List;
 
 public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessageAdapter.MessageViewHolder>{
 
-    List<ChatboxMessage> messageList;
-    Context context;
+    private List<ChatboxMessage> messageList;
+    private Context context;
 
     public FirebaseMessageAdapter(Context context, List<ChatboxMessage> messageList) {
         this.context = context;
@@ -39,7 +39,7 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
         holder.tv_username.setText(message.getUser());
         holder.tv_rank.setText(message.getRank());
         holder.getImageView().setImageResource(R.drawable.ic_person);
-        if (message.getRank().equalsIgnoreCase("Admin")) {
+        if (message.getRank().equalsIgnoreCase("Admin") || message.getRank().equalsIgnoreCase("Owner")) {
             holder.card.setCardBackgroundColor(Color.GRAY);
             holder.tv_rank.setTextColor(Color.WHITE);
             holder.tv_username.setTextColor(Color.WHITE);

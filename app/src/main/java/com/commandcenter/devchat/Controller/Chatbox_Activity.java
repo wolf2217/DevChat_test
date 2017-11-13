@@ -106,9 +106,10 @@ public class Chatbox_Activity extends AppCompatActivity {
                     time = dFormat.format(new Date()).toString();
                     if (TextUtils.isEmpty(et_message.getText().toString()) || et_message.getText().toString().length() == 0) {
                         Toast.makeText(Chatbox_Activity.this, "Please enter a message to send!", Toast.LENGTH_SHORT).show();
-                        return;
+
                     }else {
                         ChatboxMessage message = new ChatboxMessage(user, et_message.getText().toString(), rank,  curDate, time);
+                        getStatus(user);
                         processMessage(message, chatStatus);
 
                     }
@@ -128,7 +129,7 @@ public class Chatbox_Activity extends AppCompatActivity {
                 Iterable<DataSnapshot> children = dataSnapshot.getChildren();
                 for(DataSnapshot child : children) {
                     ChatboxMessage message = child.getValue(ChatboxMessage.class);
-                    //processMessage(message);
+                    getStatus(message.getUser());
                     if (!messageList.contains(message)) {
                         messageList.add(message);
                     }
@@ -180,7 +181,9 @@ public class Chatbox_Activity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case R.id.logout:
+                setStatus(user, "Offline");
                 mAuth.signOut();
+
                 return true;
 
             default:
@@ -295,7 +298,7 @@ public class Chatbox_Activity extends AppCompatActivity {
             case "Ban"://user is banned from chatting, any one of these 3 case and the user gets a toast message.
             case "Silence":
             case "Kick":
-                String toastMessage = message.getUser() + ", you do not have chat privilages.\r\nPlease email glarosa001@tampabay.rr.com to get privilages restored";
+                String toastMessage = message.getUser() + ", you do not have chat privilages.\r\nLet DevChat Admin know why you should get chat privilages restored";
                // Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
                 AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
                 alertBuilder.setTitle("Privilages Revoked");
@@ -354,7 +357,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     private int generateID() {
 
-        int id = 000000;
+        int id;
         Random rand = new Random();
         int min = 000000;
         int max = 999999;
@@ -366,6 +369,7 @@ public class Chatbox_Activity extends AppCompatActivity {
     private void setStatus(String user, String status) {
 
         final String curStatus = status;
+        chatStatus = status;
         Query query = mAllUsers
                 .orderByChild("username")
                 .equalTo(user);
@@ -374,6 +378,26 @@ public class Chatbox_Activity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot users : dataSnapshot.getChildren()) {
                     users.getRef().child("chatStatus").setValue(curStatus);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void getStatus(String user) {
+
+        Query query = mAllUsers
+                .orderByChild("username")
+                .equalTo(user);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot users : dataSnapshot.getChildren()) {
+                   chatStatus =  users.child("chatStatus").getValue().toString();
                 }
             }
 
