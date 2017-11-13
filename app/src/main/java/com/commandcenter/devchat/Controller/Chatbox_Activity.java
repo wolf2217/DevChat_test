@@ -14,6 +14,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,6 +31,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
@@ -59,6 +63,7 @@ public class Chatbox_Activity extends AppCompatActivity {
    // private DatabaseReference mDataRef;
     private DatabaseReference mNewMessageRef;
     private DatabaseReference mUsers;
+    private DatabaseReference mAllUsers;
     private FirebaseAuth mAuth;
 
     public String user;
@@ -81,7 +86,7 @@ public class Chatbox_Activity extends AppCompatActivity {
       //  mDataRef = mDatabase.getReference("messages");
         mNewMessageRef = mDatabase.getReference("messages").child(curDate);
         mUsers = mDatabase.getReference("users").child(mAuth.getCurrentUser().getUid());
-
+        mAllUsers = mDatabase.getReference("users");
         messageRecView = findViewById(R.id.chatbox_recView);
         et_message = findViewById(R.id.chatbox_et_message);
         messageList = new ArrayList<>();
@@ -158,7 +163,29 @@ public class Chatbox_Activity extends AppCompatActivity {
 
             }
         });
-        setStatus("Online");
+        setStatus(user,"Online");
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.navigation, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case R.id.logout:
+                mAuth.signOut();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
 
     }
 
@@ -202,27 +229,44 @@ public class Chatbox_Activity extends AppCompatActivity {
             case "Active":// user has full access to chat
                 switch (curRank) {
                        case "Admin"://user is Admin and has more privilages
-                       case "Owner"://user is Owner and has more privilages
+                       case "Owner":
+                       case "Moderator":
                             if (curMessage.startsWith("~")) {
                                 String[] messageDetails = curMessage.split(" ");//split the current message on the space to get the command(param 0), the username(param 1) i.e ~ban Inked
                                 switch (messageDetails[0]) {
                                     //commands
                                     case "~ban":
                                         //set user status
-                                        mUsers.child("chatStatus").setValue("Ban");
+                                        setStatus(messageDetails[1], "Ban");
                                         SimpleDateFormat dFormat = new SimpleDateFormat("hh:mm:ss a");
                                         dFormat.setTimeZone(TimeZone.getDefault());
                                         String curtime = dFormat.format(new Date()).toString();
-                                        ChatboxMessage banMessage = new ChatboxMessage(curUser, curUser + " has been banned by Admin", curRank, curDate, curtime);
+                                        ChatboxMessage banMessage = new ChatboxMessage(curUser, messageDetails[1] + " has been Banned by Admin", curRank, curDate, curtime);
                                         mNewMessageRef.push().setValue(banMessage);
                                         break;
                                     case "~kick":
-
+                                        mUsers.child("chatStatus").setValue("Kick");
+                                        dFormat = new SimpleDateFormat("hh:mm:ss a");
+                                        dFormat.setTimeZone(TimeZone.getDefault());
+                                        curtime = dFormat.format(new Date()).toString();
+                                        banMessage = new ChatboxMessage(curUser, curUser + " has been Kicked by Admin", curRank, curDate, curtime);
+                                        mNewMessageRef.push().setValue(banMessage);
                                         break;
                                     case "~silence":
-
+                                        mUsers.child("chatStatus").setValue("Silence");
+                                        dFormat = new SimpleDateFormat("hh:mm:ss a");
+                                        dFormat.setTimeZone(TimeZone.getDefault());
+                                        curtime = dFormat.format(new Date()).toString();
+                                        banMessage = new ChatboxMessage(curUser, curUser + " has been Silenced by Admin", curRank, curDate, curtime);
+                                        mNewMessageRef.push().setValue(banMessage);
                                         break;
                                     case "~warn":
+                                       // mUsers.child("chatStatus").setValue("Kick");
+                                        dFormat = new SimpleDateFormat("hh:mm:ss a");
+                                        dFormat.setTimeZone(TimeZone.getDefault());
+                                        curtime = dFormat.format(new Date()).toString();
+                                        banMessage = new ChatboxMessage(curUser, curUser + " this is a warning, there won't be another!", curRank, curDate, curtime);
+                                        mNewMessageRef.push().setValue(banMessage);
 
                                         break;
                                 }
@@ -230,9 +274,6 @@ public class Chatbox_Activity extends AppCompatActivity {
                                 mNewMessageRef.push().setValue(message);
                                 et_message.setText("");
                             }
-                        break;
-                        case "Moderator":
-
                         break;
 
                         default: //all other user privilages just send the message , when we decide to add more ranks we will put them here to process.
@@ -249,7 +290,7 @@ public class Chatbox_Activity extends AppCompatActivity {
                         et_message.setText("");
                         break;
                 }
-                break;
+            break;
             //end Online Status
             case "Ban"://user is banned from chatting, any one of these 3 case and the user gets a toast message.
             case "Silence":
@@ -294,7 +335,7 @@ public class Chatbox_Activity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         getUser();
-        setStatus("Online");
+        setStatus(user,"Online");
     }
 
     @Override
@@ -307,7 +348,7 @@ public class Chatbox_Activity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        setStatus("Offline");
+        setStatus(user,"Offline");
         mAuth.signOut();
     }
 
@@ -322,37 +363,24 @@ public class Chatbox_Activity extends AppCompatActivity {
         return id;
     }
 
-    private void setStatus(String status) {
+    private void setStatus(String user, String status) {
 
-        SimpleDateFormat dFormat;
-        ChatboxMessage message;
+        final String curStatus = status;
+        Query query = mAllUsers
+                .orderByChild("username")
+                .equalTo(user);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot users : dataSnapshot.getChildren()) {
+                    users.getRef().child("chatStatus").setValue(curStatus);
+                }
+            }
 
-        switch(status) {
-            case "Online":
-                mUsers.child("status").setValue("Online");
-            /*    dFormat = new SimpleDateFormat("hh/mm/ss a");
-                dFormat.setTimeZone(TimeZone.getDefault());
-                time = dFormat.format(new Date()).toString();
-                String  date = setDate();
-                message = new ChatboxMessage("DevChat Bot ", user + " is now Online", "BOT", date, time);
-                mNewMessageRef.push().setValue(message);*/
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-                break;
-            case "Offline":
-                mUsers.child("status").setValue("Offline");
-                dFormat = new SimpleDateFormat("hh/mm/ss a");
-                dFormat.setTimeZone(TimeZone.getDefault());
-                time = dFormat.format(new Date()).toString();
-                String date = setDate();
-                message = new ChatboxMessage("DevChat Bot ",  user + " is now Offline", "BOT", date, time);
-                mNewMessageRef.push().setValue(message);
-                break;
-            case "Banned":
-
-                break;
-            case "Silenced":
-
-                break;
-        }
+            }
+        });
     }
 }

@@ -7,4 +7,6 @@
     <string name="btnCancel">Cancel</string>
     <string name="usernameHint">Username</string>
     <string name="btnSend">Send</string>
+    <string name="navLogout">Logout</string>
+    <string name="navCreateNewTitle">Create New</string>
 </resources>
