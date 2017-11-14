@@ -9,4 +9,5 @@
     <string name="btnSend">Send</string>
     <string name="navLogout">Logout</string>
     <string name="navCreateNewTitle">Create New</string>
+    <string name="settings">Settings</string>
 </resources>

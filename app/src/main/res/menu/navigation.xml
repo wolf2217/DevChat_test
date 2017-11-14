@@ -6,7 +6,10 @@
     </item>
     <item
         android:id="@+id/createNew"
-        android:title="@string/navCreateNewTitle"
-        >
+        android:title="@string/navCreateNewTitle">
+    </item>
+    <item
+        android:id="@+id/settings"
+        android:title="@string/settings">
     </item>
 </menu>

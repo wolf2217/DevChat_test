@@ -26,6 +26,7 @@ import com.commandcenter.devchat.Adapter.FirebaseMessageAdapter;
 import com.commandcenter.devchat.Model.ChatboxMessage;
 import com.commandcenter.devchat.R;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -164,32 +165,34 @@ public class Chatbox_Activity extends AppCompatActivity {
 
             }
         });
-        setStatus(user,"Online");
-
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.navigation, menu);
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
 
-        switch (item.getItemId()) {
+        if (mAuth.getCurrentUser() != null) {
+            switch (item.getItemId()) {
 
-            case R.id.logout:
-                setStatus(user, "Offline");
-                mAuth.signOut();
+                case R.id.logout:
+                    setStatus("Inked", "Offline");
+                    Toast.makeText(this, "User signed out!", Toast.LENGTH_SHORT).show();
+                   // mAuth.signOut();
+                    return true;
 
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
         }
 
+        return super.onOptionsItemSelected(item);
     }
 
     //get current user
@@ -335,24 +338,40 @@ public class Chatbox_Activity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (isFinishing()) {
+            setStatus(user, "Offline");
+        }
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
-        getUser();
-        setStatus(user,"Online");
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            setStatus(user,"Online");
+        }else {
+            Intent mainIntent = new Intent(Chatbox_Activity.this, MainActivity.class);
+            startActivity(mainIntent);
+            finish();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-      //  setStatus("Offline");
-       // mAuth.signOut();
+        setStatus(user,"Offline");
+        mAuth.signOut();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        setStatus(user,"Offline");
-        mAuth.signOut();
+       // setStatus(user,"Offline");
+       // mAuth.signOut();
     }
 
     private int generateID() {
@@ -368,24 +387,59 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     private void setStatus(String user, String status) {
 
-        final String curStatus = status;
-        chatStatus = status;
-        Query query = mAllUsers
-                .orderByChild("username")
-                .equalTo(user);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot users : dataSnapshot.getChildren()) {
-                    users.getRef().child("chatStatus").setValue(curStatus);
-                }
-            }
+        switch (status) {
+            case "Online":
+                final String onLineStatus = status;
+                chatStatus = status;
+                Query onlineQuery = mAllUsers
+                        .orderByChild("username")
+                        .equalTo(user);
+                onlineQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot users : dataSnapshot.getChildren()) {
+                            users.getRef().child("status").setValue(onLineStatus);
+                        }
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                    }
+                });
+                break;
+            case "Offline":
+               final String offLineStatus = status;
+                chatStatus = status;
+                Query offlineQuery = mAllUsers
+                        .orderByChild("username")
+                        .equalTo(user);
+                offlineQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot users : dataSnapshot.getChildren()) {
+                            users.getRef().child("status").setValue(offLineStatus);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+                break;
+            case "Active":
+
+                break;
+
+            case "Ban":
+            case "Silence":
+            case "Kick":
+
+                break;
+            default:
+
+        }
     }
 
     private void getStatus(String user) {
