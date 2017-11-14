@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,10 +41,12 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
         holder.tv_rank.setText(message.getRank());
         holder.getImageView().setImageResource(R.drawable.ic_person);
         if (message.getRank().equalsIgnoreCase("Admin")) {
-            holder.card.setCardBackgroundColor(Color.GRAY);
-            holder.tv_rank.setTextColor(Color.WHITE);
+            holder.card.setCardBackgroundColor(Color.parseColor("#DBA120"));
+            holder.tv_rank.setTextColor(Color.parseColor("#4F3A0C"));
             holder.tv_username.setTextColor(Color.WHITE);
-            holder.tv_message.setTextColor(Color.WHITE);
+            holder.tv_message.setTextColor(Color.parseColor("#B55106"));
+            holder.getImageView().setImageResource(R.drawable.ic_face_black_24dp);
+
         }
     }
 

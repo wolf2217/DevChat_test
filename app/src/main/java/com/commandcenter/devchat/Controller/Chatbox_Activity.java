@@ -4,6 +4,7 @@ package com.commandcenter.devchat.Controller;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ClipData;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
@@ -12,14 +13,17 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.commandcenter.devchat.Adapter.FirebaseMessageAdapter;
@@ -50,6 +54,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     private EditText et_message;
     private Button btnSend;
+    private TextView incoming_msg;
 
     //recyclerview
     private RecyclerView messageRecView;
@@ -64,6 +69,8 @@ public class Chatbox_Activity extends AppCompatActivity {
     private DatabaseReference mNewMessageRef;
     private DatabaseReference mUsers;
     private DatabaseReference mAllUsers;
+    private DatabaseReference mIncomingMsg;
+    private DatabaseReference uLogOff;
     private FirebaseAuth mAuth;
 
     public String user;
@@ -74,6 +81,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     private String curDate;
     private String time;
+    private String isTyping = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,15 +93,66 @@ public class Chatbox_Activity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
       //  mDataRef = mDatabase.getReference("messages");
         mNewMessageRef = mDatabase.getReference("messages").child(curDate);
+        mIncomingMsg = mDatabase.getReference("Typing");
         mUsers = mDatabase.getReference("users").child(mAuth.getCurrentUser().getUid());
         mAllUsers = mDatabase.getReference("users");
         messageRecView = findViewById(R.id.chatbox_recView);
         et_message = findViewById(R.id.chatbox_et_message);
+        incoming_msg = findViewById(R.id.chatbox_incoming);
+        uLogOff = mDatabase.getReference("users").child(mAuth.getCurrentUser().getUid()).child("status");
         messageList = new ArrayList<>();
         userList = new ArrayList<>();
 
+
         //Button click event
         btnSend =  findViewById(R.id.chatbox_btnSend);
+
+
+
+        mIncomingMsg.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mIncomingMsg = mDatabase.getReference().child("Typing");
+
+                isTyping = dataSnapshot.getValue().toString();
+
+                if (isTyping.equalsIgnoreCase("True")){
+                    incoming_msg.setText("Someone Is Typing...");
+                }else{
+                    incoming_msg.setText("");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        et_message.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (!TextUtils.isEmpty(et_message.getText())){
+                    //mIncomingMsg.setValue("True");
+                    mIncomingMsg.setValue("True");
+                    incoming_msg.setText("Someone Is Typing");
+                }else{
+                    mIncomingMsg.setValue("False");
+                    incoming_msg.setText("");
+                }
+            }
+        });
+
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -124,10 +183,12 @@ public class Chatbox_Activity extends AppCompatActivity {
         mNewMessageRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 messageList.clear();
                 Iterable<DataSnapshot> children = dataSnapshot.getChildren();
                 for(DataSnapshot child : children) {
                     ChatboxMessage message = child.getValue(ChatboxMessage.class);
+
                     //processMessage(message);
                     if (!messageList.contains(message)) {
                         messageList.add(message);
@@ -180,6 +241,7 @@ public class Chatbox_Activity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case R.id.logout:
+                uLogOff.setValue("Offline");
                 mAuth.signOut();
                 return true;
 
@@ -221,9 +283,34 @@ public class Chatbox_Activity extends AppCompatActivity {
     private void processMessage(final ChatboxMessage message, String chatstatus) {
 
         String[] ban_words = new String[] {"shit", "fuck", "dick", "pussy", "asshole", "ass"};
+
         String curMessage = message.getChatMessage();//gets message
         String curUser = message.getUser();//gets user
         String curRank = message.getRank();//gets rank
+        String toastMessage = message.getUser() + ", you do not have chat privilages.\r\nPlease email glarosa001@tampabay.rr.com to get privilages restored";
+        if (curUser.equalsIgnoreCase(user ) && curRank.equalsIgnoreCase("ban")){
+            // Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+            alertBuilder.setTitle("Privilages Revoked");
+
+            final EditText input = new EditText(this);
+            input.setInputType(InputType.TYPE_CLASS_TEXT);
+            alertBuilder.setView(input);
+            alertBuilder.setMessage(toastMessage)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String email = "glarosa001@tampabay.rr.com";
+                            String subject = "DevChat Banned Account";
+                            String emailMessage = "User [" + message.getUser() + "] would Like Their Account Privilages Restored!\r\nReason : " + input.getText().toString();
+                            EmailHelper emailHelper = new EmailHelper(Chatbox_Activity.this, email, subject, emailMessage);
+                            emailHelper.sendEmail(email, subject, emailMessage);
+                        }
+                    });
+            AlertDialog alert = alertBuilder.create();
+            alert.show();
+        }
+        //et_message.setText("");
 
         switch(chatstatus) {
             case "Active":// user has full access to chat
@@ -295,28 +382,7 @@ public class Chatbox_Activity extends AppCompatActivity {
             case "Ban"://user is banned from chatting, any one of these 3 case and the user gets a toast message.
             case "Silence":
             case "Kick":
-                String toastMessage = message.getUser() + ", you do not have chat privilages.\r\nPlease email glarosa001@tampabay.rr.com to get privilages restored";
-               // Toast.makeText(this, toastMessage, Toast.LENGTH_SHORT).show();
-                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-                alertBuilder.setTitle("Privilages Revoked");
 
-                final EditText input = new EditText(this);
-                input.setInputType(InputType.TYPE_CLASS_TEXT);
-                alertBuilder.setView(input);
-                alertBuilder.setMessage(toastMessage)
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                String email = "glarosa001@tampabay.rr.com";
-                                String subject = "DevChat Banned Account";
-                                String emailMessage = "User [" + message.getUser() + "] would Like Their Account Privilages Restored!\r\nReason : " + input.getText().toString();
-                                EmailHelper emailHelper = new EmailHelper(Chatbox_Activity.this, email, subject, emailMessage);
-                                emailHelper.sendEmail(email, subject, emailMessage);
-                            }
-                        });
-                AlertDialog alert = alertBuilder.create();
-                alert.show();
-                et_message.setText("");
                 break;
 
         }
