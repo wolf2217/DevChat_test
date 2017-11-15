@@ -23,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -82,6 +83,7 @@ public class Chatbox_Activity extends AppCompatActivity {
     private String curDate;
     private String time;
     private String isTyping = "";
+    //private LinearLayout msg_click;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +101,7 @@ public class Chatbox_Activity extends AppCompatActivity {
         messageRecView = findViewById(R.id.chatbox_recView);
         et_message = findViewById(R.id.chatbox_et_message);
         incoming_msg = findViewById(R.id.chatbox_incoming);
+        //msg_click = (LinearLayout)findViewById(R.id.user_avatar_rank);
         uLogOff = mDatabase.getReference("users").child(mAuth.getCurrentUser().getUid()).child("status");
         messageList = new ArrayList<>();
         userList = new ArrayList<>();
@@ -106,7 +109,6 @@ public class Chatbox_Activity extends AppCompatActivity {
 
         //Button click event
         btnSend =  findViewById(R.id.chatbox_btnSend);
-
 
 
         mIncomingMsg.addValueEventListener(new ValueEventListener() {
