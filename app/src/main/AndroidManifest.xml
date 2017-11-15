@@ -35,7 +35,9 @@
         <activity
             android:name=".Controller.ActivityHome"
             android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Controller.UsersList" />
+        <activity android:name=".Controller.User_Profile"></activity>
     </application>
 
 </manifest>
