@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.commandcenter.devchat.Adapter.FirebaseMessageAdapter;
@@ -51,6 +52,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     private EditText et_message;
     private Button btnSend;
+    private TextView incoming_msg;
 
     //recyclerview
     private RecyclerView messageRecView;
@@ -65,6 +67,7 @@ public class Chatbox_Activity extends AppCompatActivity {
     private DatabaseReference mNewMessageRef;
     private DatabaseReference mUsers;
     private DatabaseReference mAllUsers;
+    private DatabaseReference mIncomingMsg;
     private FirebaseAuth mAuth;
 
     public String user;
@@ -81,18 +84,57 @@ public class Chatbox_Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chatbox);
 
-        curDate = setDate();
-        mDatabase = FirebaseDatabase.getInstance();
         mAuth = FirebaseAuth.getInstance();
-      //  mDataRef = mDatabase.getReference("messages");
-        mNewMessageRef = mDatabase.getReference("messages").child(curDate);
-        mUsers = mDatabase.getReference("users").child(mAuth.getCurrentUser().getUid());
-        mAllUsers = mDatabase.getReference("users");
-        messageRecView = findViewById(R.id.chatbox_recView);
-        et_message = findViewById(R.id.chatbox_et_message);
-        messageList = new ArrayList<>();
-        userList = new ArrayList<>();
+        if (mAuth.getCurrentUser() != null) {
+            Init();
+            //Load messages from current date
 
+            mNewMessageRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    messageList.clear();
+                    Iterable<DataSnapshot> children = dataSnapshot.getChildren();
+                    for(DataSnapshot child : children) {
+                        ChatboxMessage message = child.getValue(ChatboxMessage.class);
+                        getStatus(message.getUser());
+                        if (!messageList.contains(message)) {
+                            messageList.add(message);
+                        }
+                    }
+                    messageAdapter = new FirebaseMessageAdapter(getApplicationContext(), messageList);
+                    RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(Chatbox_Activity.this);
+                    messageRecView.setLayoutManager(mLayoutManager);
+                    messageRecView.setItemAnimator(new DefaultItemAnimator());
+                    messageRecView.setAdapter(messageAdapter);
+                    mLayoutManager.scrollToPosition(messageList.size() - 1);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
+
+            mUsers.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    user = dataSnapshot.child("username").getValue().toString();
+                    rank = dataSnapshot.child("rank").getValue().toString();
+                    status = dataSnapshot.child("status").getValue().toString();
+                    chatStatus = dataSnapshot.child("chatStatus").getValue().toString();
+                    welcomeUser(user);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }else {
+            Intent intent = new Intent(Chatbox_Activity.this, MainActivity.class);
+            startActivity(intent);
+        }
         //Button click event
         btnSend =  findViewById(R.id.chatbox_btnSend);
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -100,20 +142,15 @@ public class Chatbox_Activity extends AppCompatActivity {
             public void onClick(View v) {
 
                 if (TextUtils.isEmpty(et_message.getText().toString())) {
-
+                    Toast.makeText(Chatbox_Activity.this, "Please enter a message to send!", Toast.LENGTH_SHORT).show();
                 }else {
                     SimpleDateFormat dFormat = new SimpleDateFormat("hh:mm:ss a");
                     dFormat.setTimeZone(TimeZone.getDefault());
                     time = dFormat.format(new Date()).toString();
-                    if (TextUtils.isEmpty(et_message.getText().toString()) || et_message.getText().toString().length() == 0) {
-                        Toast.makeText(Chatbox_Activity.this, "Please enter a message to send!", Toast.LENGTH_SHORT).show();
 
-                    }else {
                         ChatboxMessage message = new ChatboxMessage(user, et_message.getText().toString(), rank,  curDate, time);
                         getStatus(user);
                         processMessage(message, chatStatus);
-
-                    }
 
                 }
             }
@@ -121,50 +158,7 @@ public class Chatbox_Activity extends AppCompatActivity {
         //this removes the specific node and all the child nodes from firebase
         // mNewMessageRef.removeValue();
 
-        //Load messages from current date
 
-        mNewMessageRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                messageList.clear();
-                Iterable<DataSnapshot> children = dataSnapshot.getChildren();
-                for(DataSnapshot child : children) {
-                    ChatboxMessage message = child.getValue(ChatboxMessage.class);
-                    getStatus(message.getUser());
-                    if (!messageList.contains(message)) {
-                        messageList.add(message);
-                    }
-                }
-                messageAdapter = new FirebaseMessageAdapter(getApplicationContext(), messageList);
-                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(Chatbox_Activity.this);
-                messageRecView.setLayoutManager(mLayoutManager);
-                messageRecView.setItemAnimator(new DefaultItemAnimator());
-                messageRecView.setAdapter(messageAdapter);
-                mLayoutManager.scrollToPosition(messageList.size() - 1);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
-        mUsers.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                user = dataSnapshot.child("username").getValue().toString();
-                rank = dataSnapshot.child("rank").getValue().toString();
-                status = dataSnapshot.child("status").getValue().toString();
-                chatStatus = dataSnapshot.child("chatStatus").getValue().toString();
-                welcomeUser(user);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     @Override
@@ -177,22 +171,47 @@ public class Chatbox_Activity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
-
         if (mAuth.getCurrentUser() != null) {
+
             switch (item.getItemId()) {
-
                 case R.id.logout:
-                    setStatus("Inked", "Offline");
                     Toast.makeText(this, "User signed out!", Toast.LENGTH_SHORT).show();
-                   // mAuth.signOut();
+                    signOut();
                     return true;
+                case R.id.navFriends:
 
+                    return true;
                 default:
                     return super.onOptionsItemSelected(item);
             }
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void signOut() {
+        mUsers.child("status").setValue("Offline");
+        mAuth.signOut();
+        Intent intent = new Intent(Chatbox_Activity.this, MainActivity.class);
+        startActivity(intent);
+
+    }
+
+    private void Init() {
+
+        curDate = setDate();
+        mDatabase = FirebaseDatabase.getInstance();
+        //  mDataRef = mDatabase.getReference("messages");
+        mNewMessageRef = mDatabase.getReference("messages").child(curDate);
+        mUsers = mDatabase.getReference("users").child(mAuth.getCurrentUser().getUid());
+        mAllUsers = mDatabase.getReference("users");
+
+        messageRecView = findViewById(R.id.chatbox_recView);
+        et_message = findViewById(R.id.chatbox_et_message);
+        incoming_msg = findViewById(R.id.chatbox_incoming);
+        messageList = new ArrayList<>();
+        userList = new ArrayList<>();
+
     }
 
     //get current user
@@ -243,7 +262,7 @@ public class Chatbox_Activity extends AppCompatActivity {
                                     //commands
                                     case "~ban":
                                         //set user status
-                                        setStatus(messageDetails[1], "Ban");
+                                        //setStatus(messageDetails[1], "Ban");
                                         SimpleDateFormat dFormat = new SimpleDateFormat("hh:mm:ss a");
                                         dFormat.setTimeZone(TimeZone.getDefault());
                                         String curtime = dFormat.format(new Date()).toString();
@@ -333,45 +352,8 @@ public class Chatbox_Activity extends AppCompatActivity {
         SimpleDateFormat dFormat = new SimpleDateFormat("hh:mm:ss a");
         String curTime = dFormat.format(new Date()).toString();
 
-        ChatboxMessage message = new ChatboxMessage("DevChat Bot", "Welcome to DevChat : " + user + " is now ONLINE!", "Moderator Bot", curDate, curTime);
+        ChatboxMessage message = new ChatboxMessage("DevChat Bot", "Welcome to DevChat : " + user + " is now ONLINE!", "Moderator", curDate, curTime);
         mNewMessageRef.push().setValue(message);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (isFinishing()) {
-            setStatus(user, "Offline");
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            setStatus(user,"Online");
-        }else {
-            Intent mainIntent = new Intent(Chatbox_Activity.this, MainActivity.class);
-            startActivity(mainIntent);
-            finish();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        setStatus(user,"Offline");
-        mAuth.signOut();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-       // setStatus(user,"Offline");
-       // mAuth.signOut();
     }
 
     private int generateID() {

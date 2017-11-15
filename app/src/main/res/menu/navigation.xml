@@ -5,8 +5,8 @@
         android:title="@string/navLogout">
     </item>
     <item
-        android:id="@+id/createNew"
-        android:title="@string/navCreateNewTitle">
+        android:id="@+id/navFriends"
+        android:title="@string/navfriends">
     </item>
     <item
         android:id="@+id/settings"

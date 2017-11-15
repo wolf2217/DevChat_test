@@ -4,14 +4,25 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.commandcenter.devchat.Model.ChatboxMessage;
 import com.commandcenter.devchat.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -23,11 +34,15 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
     public FirebaseMessageAdapter(Context context, List<ChatboxMessage> messageList) {
         this.context = context;
         this.messageList = messageList;
+
+
     }
+
 
     @Override
     public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chatbox_single_message_row, parent, false);
+
         return new MessageViewHolder(view);
     }
 
@@ -39,12 +54,7 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
         holder.tv_username.setText(message.getUser());
         holder.tv_rank.setText(message.getRank());
         holder.getImageView().setImageResource(R.drawable.ic_person);
-        if (message.getRank().equalsIgnoreCase("Admin") || message.getRank().equalsIgnoreCase("Owner")) {
-            holder.card.setCardBackgroundColor(Color.GRAY);
-            holder.tv_rank.setTextColor(Color.WHITE);
-            holder.tv_username.setTextColor(Color.WHITE);
-            holder.tv_message.setTextColor(Color.WHITE);
-        }
+
     }
 
     @Override

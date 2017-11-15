@@ -1,5 +1,6 @@
 package com.commandcenter.devchat.Controller;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -53,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
 
     private String status;
 
+    //Progress Dialog
+     private ProgressDialog mLoginProgress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
         mUsers = mDatabase.getReference("users");
         mMessages = mDatabase.getReference("messages");
 
+        mLoginProgress = new ProgressDialog(this);
+       // mAuth.signOut();
         et_email    = findViewById(R.id.login_et_email);
         et_password = findViewById(R.id.login_et_password);
 
@@ -75,19 +81,14 @@ public class MainActivity extends AppCompatActivity {
             getUser();
         }
 
-        Intent intent = getIntent();
-        Bundle details = intent.getExtras();
-
-        if (details != null) {
-            values = intent.getStringArrayExtra("details");
-            et_email.setText(values[0]);
-            et_password.setText(values[1]);
-        }
-
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (currentUser == null) {
+                    mLoginProgress.setTitle("Logging in user");
+                    mLoginProgress.setMessage("Please wait while DevChat Logs you in!");
+                    mLoginProgress.setCanceledOnTouchOutside(false);
+                    mLoginProgress.show();
                     loginUser(et_email.getText().toString(), et_password.getText().toString());
                 }else {
                     Intent chatBoxIntent = new Intent(MainActivity.this, Chatbox_Activity.class);
@@ -118,22 +119,18 @@ public class MainActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 //sign in successful
+                                mLoginProgress.dismiss();
                                 setStatus(user,"Online");
                                 Intent chatBoxIntent = new Intent(MainActivity.this, Chatbox_Activity.class);
+                                chatBoxIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 Bundle details = new Bundle();
                                 details.putString("user", user);
                                 chatBoxIntent.putExtras(details);
                                 startActivity(chatBoxIntent);
+                                finish();
                             }else {
                                 //sign in failure
-                                String[] deatails = new String[] {et_email.getText().toString(), et_password.getText().toString()};
-
                                 Toast.makeText(MainActivity.this, "Email not found, Please Register a new Account!", Toast.LENGTH_SHORT).show();
-                                Intent registerIntent = new Intent(MainActivity.this, ActivityRegister.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putStringArray("details", deatails);
-                                registerIntent.putExtras(bundle);
-                                startActivity(registerIntent);
                             }
                         }
                     });
@@ -161,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         switch(status) {
             case "Online":
                 mUsers.child(mAuth.getCurrentUser().getUid()).child("status").setValue("Online");
-            break;
+                break;
             case "Offline":
                 mUsers.child(mAuth.getCurrentUser().getUid()).child("status").setValue("Offline");
                 break;
@@ -174,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
             case "Kick":
                 mUsers.child(mAuth.getCurrentUser().getUid()).child("status").setValue("Kick");
                 break;
-
         }
     }
 
@@ -214,42 +210,4 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (isFinishing()) {
-            if (currentUser != null) {
-                setStatus(user, "Offline");
-            }
-
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            setStatus(user, "Online");
-            mAuth.signOut();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            setStatus(user, "Offline");
-            mAuth.signOut();
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        //setStatus("Offline");
-       // mAuth.signOut();
-    }
 }
