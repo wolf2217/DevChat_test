@@ -145,7 +145,7 @@ public class Chatbox_Activity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (!TextUtils.isEmpty(et_message.getText())){
-                    //mIncomingMsg.setValue("True");
+                    mIncomingMsg.setValue("True");
                     mIncomingMsg.setValue("True");
                     incoming_msg.setText("Someone Is Typing");
                 }else{
