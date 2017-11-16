@@ -9,8 +9,10 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -71,6 +73,7 @@ public class Chatbox_Activity extends AppCompatActivity {
 
     private String curDate;
     private String time;
+    private String isTyping = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -202,14 +205,59 @@ public class Chatbox_Activity extends AppCompatActivity {
         mNewMessageRef = mDatabase.getReference("messages").child(curDate);
         mUsers = mDatabase.getReference("users").child(mAuth.getCurrentUser().getUid());
         mAllUsers = mDatabase.getReference("users");
-
+        mIncomingMsg = mDatabase.getReference("Typing");
         messageRecView = (RecyclerView) findViewById(R.id.chatbox_recView);
         et_message = (EditText) findViewById(R.id.chatbox_et_message);
         incoming_msg = (TextView) findViewById(R.id.chatbox_incoming);
         messageList = new ArrayList<>();
         userList = new ArrayList<>();
 
+        mIncomingMsg.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mIncomingMsg = mDatabase.getReference().child("Typing");
+                isTyping = dataSnapshot.getValue().toString();
+
+                if (isTyping.equalsIgnoreCase("True")){
+                    incoming_msg.setText("Someone Is Typing");
+                }else{
+                    incoming_msg.setText("");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+
+        et_message.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!TextUtils.isEmpty(et_message.getText())){
+                    mIncomingMsg.setValue("True");
+                    incoming_msg.setText("Someone Is Typing...");
+                }else{
+                    mIncomingMsg.setValue("False");
+                    incoming_msg.setText("");
+                }
+            }
+        });
+
     }
+
+
 
     //get current user
     private String getUser() {
