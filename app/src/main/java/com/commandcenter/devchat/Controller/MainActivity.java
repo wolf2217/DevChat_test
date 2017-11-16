@@ -1,5 +1,6 @@
 package com.commandcenter.devchat.Controller;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.commandcenter.devchat.Model.ChatboxMessage;
@@ -23,6 +25,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
@@ -50,6 +53,11 @@ public class MainActivity extends AppCompatActivity {
     private String time;
     private String date;
 
+    private String status;
+
+    //Progress Dialog
+     private ProgressDialog mLoginProgress;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,26 +68,28 @@ public class MainActivity extends AppCompatActivity {
         mUsers = mDatabase.getReference("users");
         mMessages = mDatabase.getReference("messages");
 
-        et_email    = findViewById(R.id.login_et_email);
-        et_password = findViewById(R.id.login_et_password);
+        mLoginProgress = new ProgressDialog(this);
+       // mAuth.signOut();
+        et_email    = (EditText) findViewById(R.id.login_et_email);
+        et_password = (EditText) findViewById(R.id.login_et_password);
 
-        btn_login    = findViewById(R.id.login_btnLogin);
-        btn_register = findViewById(R.id.login_btnRegister);
+        btn_login    = (Button) findViewById(R.id.login_btnLogin);
+        btn_register = (Button) findViewById(R.id.login_btnRegister);
 
+        if (currentUser == null) {
 
-        Intent intent = getIntent();
-        Bundle details = intent.getExtras();
-
-        if (details != null) {
-            values = intent.getStringArrayExtra("details");
-            et_email.setText(values[0]);
-            et_password.setText(values[1]);
+        }else {
+            getUser();
         }
 
         btn_login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (currentUser == null) {
+                    mLoginProgress.setTitle("Logging in user");
+                    mLoginProgress.setMessage("Please wait while DevChat Logs you in!");
+                    mLoginProgress.setCanceledOnTouchOutside(false);
+                    mLoginProgress.show();
                     loginUser(et_email.getText().toString(), et_password.getText().toString());
                 }else {
                     Intent chatBoxIntent = new Intent(MainActivity.this, Chatbox_Activity.class);
@@ -110,22 +120,15 @@ public class MainActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 //sign in successful
-                                setStatus("Online");
+                                mLoginProgress.dismiss();
+                                setStatus(user,"Online");
                                 Intent chatBoxIntent = new Intent(MainActivity.this, Chatbox_Activity.class);
-                                Bundle details = new Bundle();
-                                details.putString("user", user);
-                                chatBoxIntent.putExtras(details);
+                                chatBoxIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(chatBoxIntent);
+                                finish();
                             }else {
                                 //sign in failure
-                                String[] deatails = new String[] {et_email.getText().toString(), et_password.getText().toString()};
-
                                 Toast.makeText(MainActivity.this, "Email not found, Please Register a new Account!", Toast.LENGTH_SHORT).show();
-                                Intent registerIntent = new Intent(MainActivity.this, ActivityRegister.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putStringArray("details", deatails);
-                                registerIntent.putExtras(bundle);
-                                startActivity(registerIntent);
                             }
                         }
                     });
@@ -148,38 +151,50 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void setStatus(String status) {
-
-        SimpleDateFormat dFormat;
-        ChatboxMessage message;
+    private void setStatus(String user, String status) {
 
         switch(status) {
             case "Online":
                 mUsers.child(mAuth.getCurrentUser().getUid()).child("status").setValue("Online");
-            /*    dFormat = new SimpleDateFormat("hh/mm/ss a");
-                dFormat.setTimeZone(TimeZone.getDefault());
-                time = dFormat.format(new Date()).toString();
-                date = setDate();
-                message = new ChatboxMessage("DevChat Bot ", user + " is now Online", "BOT", date, time);
-                mMessages.child(date).push().setValue(message);*/
-
-            break;
+                break;
             case "Offline":
                 mUsers.child(mAuth.getCurrentUser().getUid()).child("status").setValue("Offline");
-                dFormat = new SimpleDateFormat("hh:mm:ss a");
-                dFormat.setTimeZone(TimeZone.getDefault());
-                time = dFormat.format(new Date()).toString();
-                date = setDate();
-                message = new ChatboxMessage("DevChat Bot ",  user + " is now Offline", "BOT", date, time);
-                mMessages.child(date).push().setValue(message);
                 break;
             case "Banned":
-
+                mUsers.child(mAuth.getCurrentUser().getUid()).child("status").setValue("Banned");
                 break;
             case "Silenced":
-
+                mUsers.child(mAuth.getCurrentUser().getUid()).child("status").setValue("Silence");
+                break;
+            case "Kick":
+                mUsers.child(mAuth.getCurrentUser().getUid()).child("status").setValue("Kick");
                 break;
         }
+    }
+
+    private String getChatStatus(String user) {
+
+        Query query = mUsers
+                .orderByChild("username")
+                .equalTo(user);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot users : dataSnapshot.getChildren()) {
+                    status =  users.child("status").getValue().toString();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        return status;
+    }
+
+    private void Init() {
+
     }
 
     private String setDate() {
@@ -193,31 +208,4 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            Intent intent = new Intent(MainActivity.this, Chatbox_Activity.class);
-            Bundle bundle = new Bundle();
-            bundle.putString("user", currentUser.getUid());
-            startActivity(intent);
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-       // setStatus("Offline");
-        //mAuth.signOut();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        //setStatus("Offline");
-       // mAuth.signOut();
-    }
 }

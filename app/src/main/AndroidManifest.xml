@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.commandcenter.devchat">
 
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -18,19 +19,25 @@
             </intent-filter>
         </activity>
         <activity android:name=".Controller.ActivityRegister" />
-        <activity android:name=".Controller.Chatbox_Activity"></activity>
+        <activity android:name=".Controller.Chatbox_Activity" />
 
         <service android:name=".MessagingService.DevChatMessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".MessagingService.DevChatIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 
-        <service android:name=".MessagingService.DevChatIDService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
-            </intent-filter>
-        </service>
+        <activity
+            android:name=".Controller.ActivityHome"
+            android:label="@string/title_activity_home"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Controller.UsersList" />
+        <activity android:name=".Controller.User_Profile"></activity>
     </application>
 
 </manifest>

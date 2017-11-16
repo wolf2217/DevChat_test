@@ -9,4 +9,11 @@
     <string name="btnSend">Send</string>
     <string name="navLogout">Logout</string>
     <string name="navCreateNewTitle">Create New</string>
+    <string name="settings">Settings</string>
+    <string name="title_activity_home">ActivityHome</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="navfriends">Friends</string>
+    <string name="gender">Gender</string>
+    <string name="navUsers">All Users</string>
 </resources>

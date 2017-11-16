@@ -1,5 +1,6 @@
 package com.commandcenter.devchat.Controller;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -16,13 +17,17 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class ActivityRegister extends AppCompatActivity {
 
-    EditText et_email, et_password, et_username;
+    EditText et_email, et_password, et_username, et_gender;
     Button btn_register, btn_cancel;
+
+    //Progress Dialog
+    private ProgressDialog msignInDialog;
 
     //Firebase
     private FirebaseAuth mAuth;
@@ -41,24 +46,15 @@ public class ActivityRegister extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance();
         mRef = mDatabase.getReference("users");
 
-        et_email     = findViewById(R.id.register_et_email);
-        et_password  = findViewById(R.id.register_et_password);
-        et_username  = findViewById(R.id.register_et_username);
-        btn_cancel   = findViewById(R.id.register_btnCancel);
-        btn_register = findViewById(R.id.register_btnRegister);
+        msignInDialog = new ProgressDialog(this);
 
-        Intent intent = getIntent();
-        Bundle details = intent.getExtras();
+        et_email     = (EditText) findViewById(R.id.register_et_email);
+        et_password  = (EditText) findViewById(R.id.register_et_password);
+        et_username  = (EditText) findViewById(R.id.register_et_username);
+        et_gender    = (EditText) findViewById(R.id.register_et_gender);
+        btn_cancel   = (Button) findViewById(R.id.register_btnCancel);
+        btn_register = (Button) findViewById(R.id.register_btnRegister);
 
-        if (details != null) {
-            values = intent.getStringArrayExtra("details");
-            et_email.setText(values[0]);
-            et_password.setText(values[1]);
-        }else {
-            values[0] = et_email.getText().toString();
-            values[1] = et_password.getText().toString();
-            values[2] = et_username.getText().toString();
-        }
 
         btn_register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,6 +69,10 @@ public class ActivityRegister extends AppCompatActivity {
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password) ) {
 
         }else {
+            msignInDialog.setTitle("Creating New User");
+            msignInDialog.setMessage("Please wait while DevChat creates your new Account...");
+            msignInDialog.setCanceledOnTouchOutside(false);
+            msignInDialog.show();
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -80,12 +80,14 @@ public class ActivityRegister extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 Toast.makeText(ActivityRegister.this, "User Account Created!", Toast.LENGTH_SHORT).show();
                                 createUser(et_username.getText().toString());
-                                Intent signInIntent = new Intent(ActivityRegister.this, MainActivity.class);
+                                msignInDialog.dismiss();
+                                Intent chatBoxIntent = new Intent(ActivityRegister.this, Chatbox_Activity.class);
                                 Bundle bundle = new Bundle();
                                 bundle.putStringArray("values", values);
-                                signInIntent.putExtras(bundle);
-                                startActivity(signInIntent);
+                                chatBoxIntent.putExtras(bundle);
+                                startActivity(chatBoxIntent);
                             } else {
+                                msignInDialog.dismiss();
                                 Toast.makeText(ActivityRegister.this, "Error Creating New User Account!", Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -99,7 +101,9 @@ public class ActivityRegister extends AppCompatActivity {
             Toast.makeText(this, "Username Field Required!", Toast.LENGTH_SHORT).show();
             return;
         }else {
-            User user = new User(et_username.getText().toString(), "Newbie", "Online", "Active");
+            FirebaseUser current_user = FirebaseAuth.getInstance().getCurrentUser();
+            String userID = current_user.getUid();
+            User user = new User(et_username.getText().toString(), et_gender.getText().toString(), "Newbie", "Online", "Active", userID);
             mRef.child(mAuth.getCurrentUser().getUid()).setValue(user);
         }
     }

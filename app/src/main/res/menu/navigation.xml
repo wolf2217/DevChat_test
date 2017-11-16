@@ -4,8 +4,15 @@
         android:id="@+id/logout"
         android:title="@string/navLogout"></item>
     <item
-        android:id="@+id/createNew"
-        android:title="@string/navCreateNewTitle"
-        >
+        android:id="@+id/navFriends"
+        android:title="@string/navfriends">
+    </item>
+    <item
+        android:id="@+id/navUsers"
+        android:title="@string/navUsers">
+    </item>
+    <item
+        android:id="@+id/settings"
+        android:title="@string/settings">
     </item>
 </menu>

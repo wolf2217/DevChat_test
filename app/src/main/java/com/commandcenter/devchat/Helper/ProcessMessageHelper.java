@@ -1,10 +1,6 @@
-package com.commandcenter.devchat.Controller;
+package com.commandcenter.devchat.Helper;
 
 import com.commandcenter.devchat.Model.ChatboxMessage;
-
-/**
- * Created by Command Center on 11/12/2017.
- */
 
 public class ProcessMessageHelper {
 

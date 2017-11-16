@@ -1,4 +1,4 @@
-package com.commandcenter.devchat.Controller;
+package com.commandcenter.devchat.Helper;
 
 import android.content.Context;
 import android.content.Intent;
