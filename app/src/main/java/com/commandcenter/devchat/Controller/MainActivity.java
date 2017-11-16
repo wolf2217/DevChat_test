@@ -123,9 +123,6 @@ public class MainActivity extends AppCompatActivity {
                                 setStatus(user,"Online");
                                 Intent chatBoxIntent = new Intent(MainActivity.this, Chatbox_Activity.class);
                                 chatBoxIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                Bundle details = new Bundle();
-                                details.putString("user", user);
-                                chatBoxIntent.putExtras(details);
                                 startActivity(chatBoxIntent);
                                 finish();
                             }else {

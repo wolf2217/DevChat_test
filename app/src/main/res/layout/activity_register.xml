@@ -39,14 +39,26 @@
 
         </android.support.design.widget.TextInputLayout>
         <android.support.design.widget.TextInputLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/register_et_username"
+            android:hint="@string/usernameHint"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
             android:layout_height="match_parent"
             android:layout_width="match_parent">
 
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/register_et_username"
-                android:hint="@string/usernameHint"/>
+                android:id="@+id/register_et_gender"
+                android:hint="@string/gender"/>
 
         </android.support.design.widget.TextInputLayout>
 

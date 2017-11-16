@@ -9,6 +9,10 @@
         android:title="@string/navfriends">
     </item>
     <item
+        android:id="@+id/navUsers"
+        android:title="@string/navUsers">
+    </item>
+    <item
         android:id="@+id/settings"
         android:title="@string/settings">
     </item>

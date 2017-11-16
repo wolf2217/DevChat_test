@@ -7,16 +7,20 @@ package com.commandcenter.devchat.Model;
 public class User {
 
     private String Username;
+    private String Gender;
     private String Rank;
     private String Status;
     private String chatStatus;
     private String userID;
 
+
     public User() {
     }
 
-    public User(String username, String rank, String status, String chatStatus, String userID) {
+
+    public User(String username, String gender, String rank, String status, String chatStatus, String userID) {
         Username = username;
+        Gender = gender;
         Rank = rank;
         Status = status;
         this.chatStatus = chatStatus;
@@ -29,6 +33,14 @@ public class User {
 
     public void setUsername(String username) {
         Username = username;
+    }
+
+    public String getGender() {
+        return Gender;
+    }
+
+    public void setGender(String gender) {
+        Gender = gender;
     }
 
     public String getRank() {

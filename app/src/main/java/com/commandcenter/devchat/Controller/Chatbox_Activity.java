@@ -2,11 +2,8 @@ package com.commandcenter.devchat.Controller;
 
 
 import android.app.AlertDialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -24,11 +21,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.commandcenter.devchat.Adapter.FirebaseMessageAdapter;
+import com.commandcenter.devchat.Helper.EmailHelper;
 import com.commandcenter.devchat.Model.ChatboxMessage;
 import com.commandcenter.devchat.R;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,12 +34,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Random;
 import java.util.TimeZone;
@@ -180,6 +173,10 @@ public class Chatbox_Activity extends AppCompatActivity {
                     return true;
                 case R.id.navFriends:
 
+                    return true;
+                case R.id.navUsers:
+                    Intent userIntent = new Intent(Chatbox_Activity.this, UsersList.class);
+                    startActivity(userIntent);
                     return true;
                 default:
                     return super.onOptionsItemSelected(item);

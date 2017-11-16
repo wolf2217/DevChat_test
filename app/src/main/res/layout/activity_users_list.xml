@@ -4,9 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.commandcenter.devchat.Controller.UsersList">
+    tools:context="com.commandcenter.devchat.Controller.UsersList"
+    android:background="@drawable/layout_background">
 
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/usersList_RecView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="10dp">

@@ -1,4 +1,4 @@
-package com.commandcenter.devchat.Controller;
+package com.commandcenter.devchat.Helper;
 
 import com.commandcenter.devchat.Model.ChatboxMessage;
 
