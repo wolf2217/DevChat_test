@@ -70,11 +70,11 @@ public class FirebaseMessageAdapter extends RecyclerView.Adapter<FirebaseMessage
 
         public MessageViewHolder(View itemView) {
             super(itemView);
-            card = itemView.findViewById(R.id.chatbox_message_cardview);
-            tv_message  = itemView.findViewById(R.id.chatbox_single_message_tv_message);
-            tv_username = itemView.findViewById(R.id.chatbox_single_row_tv_username);
-            tv_rank     = itemView.findViewById(R.id.chatbox_single_row_tv_rank);
-            iv_avatar   = itemView.findViewById(R.id.chatbox_single_row_iv_avatar);
+            card = (CardView) itemView.findViewById(R.id.chatbox_message_cardview);
+            tv_message  = (TextView) itemView.findViewById(R.id.chatbox_single_message_tv_message);
+            tv_username = (TextView) itemView.findViewById(R.id.chatbox_single_row_tv_username);
+            tv_rank     = (TextView) itemView.findViewById(R.id.chatbox_single_row_tv_rank);
+            iv_avatar   = (ImageView) itemView.findViewById(R.id.chatbox_single_row_iv_avatar);
         }
 
         public ImageView getImageView() {

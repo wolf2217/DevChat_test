@@ -48,12 +48,12 @@ public class ActivityRegister extends AppCompatActivity {
 
         msignInDialog = new ProgressDialog(this);
 
-        et_email     = findViewById(R.id.register_et_email);
-        et_password  = findViewById(R.id.register_et_password);
-        et_username  = findViewById(R.id.register_et_username);
-        et_gender    = findViewById(R.id.register_et_gender);
-        btn_cancel   = findViewById(R.id.register_btnCancel);
-        btn_register = findViewById(R.id.register_btnRegister);
+        et_email     = (EditText) findViewById(R.id.register_et_email);
+        et_password  = (EditText) findViewById(R.id.register_et_password);
+        et_username  = (EditText) findViewById(R.id.register_et_username);
+        et_gender    = (EditText) findViewById(R.id.register_et_gender);
+        btn_cancel   = (Button) findViewById(R.id.register_btnCancel);
+        btn_register = (Button) findViewById(R.id.register_btnRegister);
 
 
         btn_register.setOnClickListener(new View.OnClickListener() {

@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.commandcenter.devchat.Model.ChatboxMessage;
@@ -69,11 +70,11 @@ public class MainActivity extends AppCompatActivity {
 
         mLoginProgress = new ProgressDialog(this);
        // mAuth.signOut();
-        et_email    = findViewById(R.id.login_et_email);
-        et_password = findViewById(R.id.login_et_password);
+        et_email    = (EditText) findViewById(R.id.login_et_email);
+        et_password = (EditText) findViewById(R.id.login_et_password);
 
-        btn_login    = findViewById(R.id.login_btnLogin);
-        btn_register = findViewById(R.id.login_btnRegister);
+        btn_login    = (Button) findViewById(R.id.login_btnLogin);
+        btn_register = (Button) findViewById(R.id.login_btnRegister);
 
         if (currentUser == null) {
 

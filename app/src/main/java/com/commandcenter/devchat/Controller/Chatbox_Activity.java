@@ -129,7 +129,7 @@ public class Chatbox_Activity extends AppCompatActivity {
             startActivity(intent);
         }
         //Button click event
-        btnSend =  findViewById(R.id.chatbox_btnSend);
+        btnSend =  (Button) findViewById(R.id.chatbox_btnSend);
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -203,9 +203,9 @@ public class Chatbox_Activity extends AppCompatActivity {
         mUsers = mDatabase.getReference("users").child(mAuth.getCurrentUser().getUid());
         mAllUsers = mDatabase.getReference("users");
 
-        messageRecView = findViewById(R.id.chatbox_recView);
-        et_message = findViewById(R.id.chatbox_et_message);
-        incoming_msg = findViewById(R.id.chatbox_incoming);
+        messageRecView = (RecyclerView) findViewById(R.id.chatbox_recView);
+        et_message = (EditText) findViewById(R.id.chatbox_et_message);
+        incoming_msg = (TextView) findViewById(R.id.chatbox_incoming);
         messageList = new ArrayList<>();
         userList = new ArrayList<>();
 

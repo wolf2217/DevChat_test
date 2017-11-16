@@ -38,7 +38,7 @@ public class UsersList extends AppCompatActivity {
         mUsers = mDatabase.getReference("users");
         currentUser = mAuth.getCurrentUser();
 
-        userRecView = findViewById(R.id.usersList_RecView);
+        userRecView = (RecyclerView) findViewById(R.id.usersList_RecView);
         userRecView.setHasFixedSize(true);
         userRecView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -65,6 +65,17 @@ public class UsersList extends AppCompatActivity {
                         viewHolder.setName(users.getUsername());
                         viewHolder.setStatus(users.getStatus());
                         viewHolder.setGender(users.getGender());
+
+                        final String user_id = getRef(position).getKey();
+                        viewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                Intent intent = new Intent(UsersList.this, User_Profile.class);
+                                intent.putExtra("user_id", user_id);
+                                startActivity(intent);
+                            }
+                        });
                     }
                 }
 
@@ -131,17 +142,17 @@ public class UsersList extends AppCompatActivity {
         }
 
         public void setName(String name) {
-            TextView tv_DisplayName = mView.findViewById(R.id.single_user_tv_displayName);
+            TextView tv_DisplayName = (TextView) mView.findViewById(R.id.single_user_tv_displayName);
             tv_DisplayName.setText(name);
         }
 
         public void setStatus(String status) {
-            TextView tv_userStatus = mView.findViewById(R.id.single_user_tv_Status);
+            TextView tv_userStatus = (TextView) mView.findViewById(R.id.single_user_tv_Status);
             tv_userStatus.setText(status);
         }
 
         public void setGender(String gender) {
-            TextView tv_userGender = mView.findViewById(R.id.single_user_tv_Gender);
+            TextView tv_userGender = (TextView) mView.findViewById(R.id.single_user_tv_Gender);
             tv_userGender.setText(gender);
         }
 
